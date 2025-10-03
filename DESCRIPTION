@@ -1,0 +1,11 @@
+Package: dagnabit.docs
+Title: Documentation and Testing for the DAGnabit Project
+Version: 0.0.0.9000
+Authors@R: 
+    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
+Description: Examples, DAG diagrams, vignettes, and tests for DAGnabit.
+    Supports BUGS parser and layout editor.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
