@@ -1,0 +1,1 @@
+- `rats/rats.csv`: Rats growth (30 rats × 5 days); columns: rat, day, weight
