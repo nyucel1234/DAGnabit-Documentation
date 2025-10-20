@@ -1,0 +1,196 @@
+---
+title: "pumps"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{pumps}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE, comment = "#>",
+  fig.width = 7, fig.height = 4.8,
+  message = FALSE, warning = FALSE
+)
+suppressPackageStartupMessages({
+  library(dplyr); library(tidyr); library(ggplot2); library(coda)
+  library(rjags); library(knitr)
+  library(dagnabit.docs)
+})
+set.seed(123)
+```
+
+---
+title: "Pumps — Original BUGS → Official Diagram → Package Recreation"
+author: "Naz Yucel"
+date: "`r format(Sys.Date())`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Pumps — Original BUGS → Official Diagram → Package Recreation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+### Overview
+The Pumps example models failures in ten power-plant pumps using a hierarchical Gamma–Poisson setup that naturally accounts for differing exposure times. Each pump’s observed failures (x_i) follow a Poisson distribution with mean (lambda_i) = (theta_i) * (t_i), where (theta_i) is the failure rate for pump i and (t_i) is the length of operation time of the pump. To borrow strength across pumps, the rates share a common prior (theta_i) ~ Gamma(alpha, beta), with weakly informative hyperpriors such as (alpha) ~ Exponential(1.0) and (beta) ~ Gamma(0.1, 1.0). Fitted with JAGS, the model yields posterior estimates for the population hyperparameters (alpha), (beta) and each pump's rate (theta_i), delivering partial pooling that stabilizes noisy per-pump estimates when data are sparse. Typical outputs include a summary table of posteriors and a simple fit check plotting observed counts (x_i) against posterior mean (lambda_i) (points near the 45° line indicate a good match).
+
+### A) Original BUGS model
+
+> The Pumps example (conjugate Gamma–Poisson hierarchical model) as presented in the WinBUGS help examples.
+
+```{r pumps-bugs, results='asis'}
+paths <- c(
+  system.file("extdata/winbugs/pumps_model.bug", package = "dagnabit.docs"),
+  "inst/extdata/winbugs/pumps_model.bug",
+  "../inst/extdata/winbugs/pumps_model.bug",
+  "../../inst/extdata/winbugs/pumps_model.bug"
+)
+paths <- paths[nzchar(paths)]
+p <- paths[which(file.exists(paths))[1]]
+if (!length(p)) {
+  cat("Missing file: Please add inst/extdata/winbugs/pumps_model.bug to the package and re-knit.\n")
+} else {
+  cat(paste(readLines(p, warn = FALSE), collapse = "\n"))
+}
+```
+
+### B) Official WinBUGS diagram
+
+```{r pumps-diagram, echo=FALSE, fig.cap="Official WinBUGS 'Pumps' graphical model"}
+paths <- c(
+system.file("extdata/winbugs/pumps_diagram.png", package = "dagnabit.docs"),
+"inst/extdata/winbugs/pumps_diagram.png",
+"../inst/extdata/winbugs/pumps_diagram.png",
+"../../inst/extdata/winbugs/pumps_diagram.png"
+)
+paths <- paths[nzchar(paths)]
+img <- paths[which(file.exists(paths))[1]]
+if (!length(img)) {
+cat("Diagram not found. Add `inst/extdata/winbugs/pumps_diagram.png` and re-knit.\n")
+} else {
+knitr::include_graphics(img)
+}
+```
+
+## C) Package recreation (fit + outputs)
+
+We fit the Gamma–Poisson hierarchical model with JAGS:
+xi ~ Poisson(theta_i*t_i), i = 1,...,10
+theta_i ~ Gamma(alpha, beta), i = 1,...,10
+alpha ~ Exponential(1.0)
+beta ~ Gamma (0.1, 1.0)
+
+Operation times (thousands of hours) and failure counts from WinBUGS help.
+
+## Data
+```{r pumps-data}
+
+t <- c(94.3, 15.7, 62.9, 126.0, 5.24, 31.4, 1.05, 1.05, 2.1, 10.5)
+x <- c(   5,   1,    5,   14,   3,   19,   1,   1,   4,   22)
+N <- length(x)
+
+pumps_df <- tibble::tibble(pump = factor(seq_len(N)), t, x)
+knitr::kable(pumps_df, caption = "Pumps data (operation time t and failures x).")
+```
+
+### JAGS model 
+
+```{r pumps-model}
+pumps_model <- "
+model {
+for (i in 1:N) {
+x[i] ~ dpois(lambda[i])
+lambda[i] <- theta[i] * t[i]
+theta[i] ~ dgamma(alpha, beta)
+}
+
+# hyperpriors
+
+alpha ~ dexp(1.0)
+beta  ~ dgamma(0.1, 1.0)
+}
+"
+
+jags_data <- list(x = x, t = t, N = N)
+
+# mild, dispersed inits
+
+make_inits <- function() list(
+theta = pmax(x / pmax(t, 1e-6), 1e-3),  # crude rates
+alpha = 1,
+beta  = 1
+)
+
+params <- c("alpha","beta","theta")
+```
+
+### Fit & sample
+
+```{r pumps-fit, results='hide', message=TRUE, message=TRUE, eval=requireNamespace("rjags", quietly=TRUE)}
+mod <- rjags::jags.model(
+textConnection(pumps_model),
+data  = jags_data,
+inits = list(make_inits(), make_inits(), make_inits()),
+n.chains = 3,
+n.adapt  = 1000
+)
+
+update(mod, 2000)  # burn-in
+samp <- rjags::coda.samples(
+model = mod,
+variable.names = params,
+n.iter = 10000,
+thin = 5
+)
+```
+
+```{r pumps-summaries, eval=exists("samp")}
+s <- summary(samp)
+tab <- cbind(
+  s$statistics[, c("Mean","SD")],
+  s$quantiles[, c("2.5%","50%","97.5%")]
+)
+wanted <- c("alpha","beta", paste0("theta[", seq_len(N), "]"))
+knitr::kable(round(tab[wanted, , drop=FALSE], 4),
+             caption = "Posterior summaries for alpha, beta and theta[1:N].")
+```
+
+### Diagnostics
+
+```{r pumps-diagnostics, eval=exists("samp")}
+coda::gelman.diag(samp[, c("alpha","beta")])
+coda::autocorr.plot(samp[, c("alpha","beta")])
+```
+
+### Fitted lines vs data
+
+```{r pumps-fitted, eval=exists("samp")}
+m <- do.call(rbind, samp)
+
+# posterior means of theta[i]
+
+theta_cols <- grepl("^theta\\[[0-9]+\\]$", colnames(m))
+theta_mean <- colMeans(m[, theta_cols, drop = FALSE])
+
+plot_df <- tibble::tibble(
+pump = factor(seq_len(N)),
+t = t,
+x = x,
+theta_hat = as.numeric(theta_mean),
+lambda_hat = theta_hat * t
+)
+
+ggplot2::ggplot(plot_df, ggplot2::aes(x = lambda_hat, y = x, label = pump)) +
+ggplot2::geom_abline(slope = 1, intercept = 0, linetype = 2) +
+ggplot2::geom_point(size = 2) +
+ggplot2::geom_text(nudge_y = 0.4, size = 3) +
+ggplot2::labs(x = expression("Posterior mean " * lambda[i] == theta[i] %.% t[i]),
+              y = expression("Observed failures " * x[i]))
+```
+
+
+

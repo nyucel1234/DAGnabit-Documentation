@@ -1,0 +1,33 @@
+model
+{
+  for (i in 1:N) {
+    for (j in 1:T) {
+      Y[i,j] ~ dnorm(mu[i,j], tau.c)
+      mu[i,j] <- alpha[i] + beta[i] * (x[j] - xbar)
+    }
+    alpha[i] ~ dnorm(alpha.c, tau.alpha)
+    beta[i]  ~ dnorm(beta.c,  tau.beta)
+  }
+
+  # observation precision and SD
+  tau.c  ~ dgamma(0.001, 0.001)
+  sigma  <- 1 / sqrt(tau.c)
+
+  # population means
+  alpha.c ~ dnorm(0.0, 1.0E-6)
+  beta.c  ~ dnorm(0.0, 1.0E-6)
+
+  # ---- Choice of prior for random-effects variances ----
+  # Prior 1 (WinBUGS text): uniform on SD
+  sigma.alpha ~ dunif(0, 100)
+  sigma.beta  ~ dunif(0, 100)
+  tau.alpha   <- 1 / (sigma.alpha * sigma.alpha)
+  tau.beta    <- 1 / (sigma.beta  * sigma.beta)
+
+  # Prior 2 (not recommended in the text):
+  # tau.alpha ~ dgamma(0.001, 0.001)
+  # tau.beta  ~ dgamma(0.001, 0.001)
+
+  # derived intercept at x = 0 when centering at xbar
+  alpha0 <- alpha.c - xbar * beta.c
+}
