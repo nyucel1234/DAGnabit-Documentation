@@ -8,6 +8,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
+CAN_RUN_JAGS <- requireNamespace("rjags", quietly = TRUE) && nzchar(Sys.which("jags"))
 knitr::opts_chunk$set(
   collapse = TRUE, comment = "#>",
   fig.width = 7, fig.height = 4.8,
@@ -130,7 +131,7 @@ params <- c("alpha","beta","theta")
 
 ### Fit & sample
 
-```{r pumps-fit, results='hide', message=TRUE, message=TRUE, eval=requireNamespace("rjags", quietly=TRUE)}
+```{r pumps-fit, eval=CAN_RUN_JAGS, results='hide', message=TRUE}
 mod <- rjags::jags.model(
 textConnection(pumps_model),
 data  = jags_data,
