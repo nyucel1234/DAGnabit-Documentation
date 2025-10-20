@@ -2,10 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-*.html
 *.DS_Store
 
 /Meta/
 inst/doc
 /doc/
-docs
+
