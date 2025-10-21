@@ -1,0 +1,9 @@
+id,label,type,dist,plates
+plate_i,i plate,plate,,
+i,i,index,,
+t_i,t[i],data,,i
+theta_i,theta[i],stochastic,dgamma,i
+lambda_i,lambda[i],deterministic,,i
+x_i,x[i],stochastic,dpois,i
+alpha,alpha,stochastic,dexp,
+beta,beta,stochastic,dgamma,

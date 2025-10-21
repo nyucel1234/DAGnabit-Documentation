@@ -76,7 +76,27 @@ knitr::include_graphics(img)
 }
 ```
 
-## C) Package recreation (fit + outputs)
+### C) Nodes and Edges
+
+```{r rats-fixtures, message=FALSE, warning=FALSE}
+library(readr)
+pkg <- "dagnabit.docs"
+
+pumps_nodes <- readr::read_csv(
+  system.file("extdata/examples/pumps/nodes.csv", package = pkg),
+  show_col_types = FALSE
+)
+pumps_edges <- readr::read_csv(
+  system.file("extdata/examples/pumps/edges.csv", package = pkg),
+  show_col_types = FALSE
+)
+
+# quick sanity
+list(n_nodes = nrow(pumps_nodes), n_edges = nrow(pumps_edges))
+```
+
+
+### D) Package recreation (fit + outputs)
 
 We fit the Gamma–Poisson hierarchical model with JAGS:
 xi ~ Poisson(theta_i*t_i), i = 1,...,10

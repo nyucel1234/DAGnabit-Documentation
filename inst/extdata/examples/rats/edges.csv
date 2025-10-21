@@ -1,0 +1,17 @@
+from,to,kind
+mu_ij,Y_ij,stochastic
+tau_c,Y_ij,stochastic
+alpha_i,mu_ij,deterministic
+beta_i,mu_ij,deterministic
+x_j,mu_ij,deterministic
+xbar,mu_ij,deterministic
+alpha_c,alpha_i,stochastic
+tau_alpha,alpha_i,stochastic
+beta_c,beta_i,stochastic
+tau_beta,beta_i,stochastic
+sigma_alpha,tau_alpha,deterministic
+sigma_beta,tau_beta,deterministic
+tau_c,sigma,deterministic
+alpha_c,alpha0,deterministic
+xbar,alpha0,deterministic
+beta_c,alpha0,deterministic

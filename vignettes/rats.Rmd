@@ -77,7 +77,27 @@ if (!length(img)) {
 }
 ```
 
-## C) Package recreation (fit + outputs)
+### C) Nodes and Edges
+
+```{r rats-fixtures, message=FALSE, warning=FALSE}
+library(readr)
+pkg <- "dagnabit.docs"
+
+rats_nodes <- readr::read_csv(
+  system.file("extdata/examples/rats/nodes.csv", package = pkg),
+  show_col_types = FALSE
+)
+rats_edges <- readr::read_csv(
+  system.file("extdata/examples/rats/edges.csv", package = pkg),
+  show_col_types = FALSE
+)
+
+# quick sanity
+list(n_nodes = nrow(rats_nodes), n_edges = nrow(rats_edges))
+```
+
+
+### D) Package recreation (fit + outputs)
 
 We fit the hierarchical growth-curve with **JAGS**, centering time at \(\bar{x}=22\).
 
@@ -300,5 +320,6 @@ ggplot2::ggplot() +
 ```
 
 
+###
 
 
