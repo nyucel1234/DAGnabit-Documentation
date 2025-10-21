@@ -1,0 +1,106 @@
+---
+title: "seeds"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{seeds}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE, comment = "#>",
+  fig.width = 7, fig.height = 4.8,
+  message = FALSE, warning = FALSE
+)
+suppressPackageStartupMessages({
+  library(dplyr); library(tidyr); library(ggplot2); library(coda)
+  library(rjags); library(knitr)
+  library(dagnabit.docs)
+})
+set.seed(123)
+```
+
+---
+title: "Seeds — Original BUGS → Official Diagram → Package Recreation"
+author: "Naz Yucel"
+date: "`r format(Sys.Date())`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Seeds — Original BUGS → Official Diagram → Package Recreation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+### Overview
+
+
+### A) Original BUGS model
+
+> The Seeds example (random effect logistic regression) as presented in the WinBUGS help examples.
+
+```{r seeds-bugs, results='asis'}
+paths <- c(
+system.file("extdata/winbugs/seeds_model.bug", package = "dagnabit.docs"),
+"inst/extdata/winbugs/seeds_model.bug",
+"../inst/extdata/winbugs/seeds_model.bug",
+"../../inst/extdata/winbugs/seeds_model.bug"
+)
+paths <- paths[nzchar(paths)]
+p <- paths[which(file.exists(paths))[1]]
+if (!length(p)) {
+cat("Missing file: Please add `inst/extdata/winbugs/seeds_model.bug` to the package and re-knit.\n")
+} else {
+cat(paste(readLines(p, warn = FALSE), collapse = "\n"))
+}
+```
+
+### B) Official WinBUGS diagram
+```{r seeds-diagram, echo=FALSE, fig.cap="Official WinBUGS 'Seeds' graphical model"}
+
+```
+
+## C) Package recreation (fit + outputs)
+
+
+## Data
+```{r seeds-data}
+
+```
+
+### JAGS model 
+
+```{r seeds-model}
+
+```
+
+### Fit & sample
+
+```{r seeds-fit, results='hide', message=TRUE, message=TRUE, eval=requireNamespace("rjags", quietly=TRUE)}
+
+```
+
+```{r seeds-summaries, eval=exists("samp")}
+
+```
+
+### Diagnostics
+
+```{r seeds-diagnostics, eval=exists("samp")}
+
+```
+
+### Fitted lines vs data
+
+```{r seeds-fitted, eval=exists("samp")}
+
+```
+
+
+
+
+
+
