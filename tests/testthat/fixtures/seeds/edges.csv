@@ -1,0 +1,12 @@
+from,to,kind
+alpha0,p_i,deterministic
+alpha1,p_i,deterministic
+alpha2,p_i,deterministic
+alpha12,p_i,deterministic
+x1_i,p_i,deterministic
+x2_i,p_i,deterministic
+b_i,p_i,deterministic
+p_i,r_i,stochastic
+n_i,r_i,stochastic
+tau,b_i,stochastic
+sigma,tau,deterministic
