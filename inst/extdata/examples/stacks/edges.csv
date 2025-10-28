@@ -1,0 +1,17 @@
+from,to,kind
+x_ij,z_ij,directed
+beta0,mu_i,directed
+beta_j,mu_i,directed
+z_ij,mu_i,directed
+mu_i,Y_i,directed
+tau,Y_i,directed
+tau,sigma,directed
+Y_i,stres_i,directed
+mu_i,stres_i,directed
+sigma,stres_i,directed
+stres_i,outlier_i,directed
+beta_j,b_j,directed
+x_ij,b_j,directed
+b_j,b0,directed
+beta0,b0,directed
+x_ij,b0,directed

@@ -1,0 +1,18 @@
+id,label,type,dist,plates
+i,i,index,,
+j,j,index,,
+plate_i,i plate,plate,,
+plate_j,j plate,plate,,
+x_ij,"x[i,j]",data,,"i,j"
+beta0,beta0,stochastic,dnorm,
+beta_j,beta[j],stochastic,dnorm,"j"
+b_j,b[j],deterministic,,"j"
+b0,b0,deterministic,,
+z_ij,"z[i,j]",deterministic,,"i,j"
+mu_i,mu[i],deterministic,,"i"
+Y_i,Y[i],stochastic,dnorm,"i"
+tau,tau,stochastic,dgamma,
+sigma,sigma,deterministic,,
+stres_i,stres[i],deterministic,,"i"
+outlier_i,outlier[i],deterministic,,"i"
+phi,phi,stochastic,dgamma,
