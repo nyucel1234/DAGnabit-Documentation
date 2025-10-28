@@ -1,0 +1,13 @@
+from,to,kind
+m_ik,Y_ik,directed
+tau1,Y_ik,directed
+T_ik,m_ik,directed
+mu,m_ik,directed
+phi,m_ik,directed
+pi,m_ik,directed
+delta_i,m_ik,directed
+phi,theta,directed
+theta,equiv,directed
+tau1,sigma1,directed
+sigma2,tau2,directed
+
