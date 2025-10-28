@@ -1,0 +1,16 @@
+"id","label","type","dist","plates"
+"i","i","index",NA,NA
+"j","j","index",NA,NA
+"plate_i","i plate","plate",NA,NA
+"plate_j","j plate","plate",NA,NA
+"y_ij","y[i","j]","stochastic","dpois"
+"mu_ij","mu[i","j]","deterministic",NA
+"lambda_ij","lambda[i","j]","stochastic","dnorm"
+"alpha","alpha","stochastic","dnorm",NA
+"beta","beta","stochastic","dnorm",NA
+"gamma","gamma","stochastic","dnorm",NA
+"sigma","sigma","stochastic","dunif",NA
+"tau","tau","deterministic",NA,NA
+"x_i","x[i]","data",NA,"i"
+"doses","doses (count)","data",NA,NA
+"plates","plates (count)","data",NA,NA
