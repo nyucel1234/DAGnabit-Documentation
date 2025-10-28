@@ -1,0 +1,15 @@
+from,to,kind
+sigma,tau,directed
+tau,b_i,directed
+alpha,logPsi_i,directed
+beta1,logPsi_i,directed
+beta2,logPsi_i,directed
+year_i,logPsi_i,directed
+b_i,logPsi_i,directed
+mu_i,p0_i,directed
+mu_i,p1_i,directed
+logPsi_i,p1_i,directed
+p0_i,r0_i,directed
+n0_i,r0_i,directed
+p1_i,r1_i,directed
+n1_i,r1_i,directed
