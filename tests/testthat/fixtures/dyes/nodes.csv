@@ -1,0 +1,14 @@
+id,label,type,dist,plates
+i,i,index,,
+j,j,index,,
+plate_i,i plate,plate,,
+plate_j,j plate,plate,,
+theta,theta,stochastic,dnorm,
+tau_with,tau.with,stochastic,dgamma,
+sigma2_with,sigma2.with,deterministic,,
+ICC,ICC,stochastic,dunif,
+sigma2_btw,sigma2.btw,deterministic,,
+tau_btw,tau.btw,deterministic,,
+mu_i,mu[i],stochastic,dnorm,"i"
+y_ij,y[i,j],stochastic,dnorm,"i,j"
+

@@ -1,0 +1,9 @@
+from,to,kind
+theta,mu_i,directed
+tau_btw,mu_i,directed
+mu_i,y_ij,directed
+tau_with,y_ij,directed
+tau_with,sigma2_with,directed
+ICC,sigma2_btw,directed
+sigma2_with,sigma2_btw,directed
+sigma2_btw,tau_btw,directed
