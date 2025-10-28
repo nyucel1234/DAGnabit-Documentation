@@ -6,6 +6,7 @@ list_examples <- function() {
     list.dirs(d, full.names = FALSE, recursive = FALSE))))
 }
 
+
 path_fixture <- function(example, file = c("nodes","edges")) {
   # validate example against discovered dirs
   stopifnot(example %in% list_examples())

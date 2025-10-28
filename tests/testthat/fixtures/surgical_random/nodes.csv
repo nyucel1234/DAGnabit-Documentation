@@ -1,0 +1,11 @@
+id,label,type,dist,plates
+plate_i,i plate,plate,,
+i,i,index,,
+n_i,n[i] (observed),data,,i
+b_i,b[i],stochastic,dnorm,i
+p_i,p[i],deterministic,,i
+r_i,r[i],stochastic,dbin,i
+mu,mu,stochastic,dnorm,
+sigma,sigma,stochastic,dunif,
+tau,tau,deterministic,,
+pop_mean,pop.mean,deterministic,,

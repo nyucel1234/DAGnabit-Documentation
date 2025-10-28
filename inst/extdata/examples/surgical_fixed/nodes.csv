@@ -1,0 +1,7 @@
+id,label,type,dist,plates
+plate_i,i plate,plate,,
+i,i,index,,
+n_i,n[i] (observed),data,,i
+p_i,p[i],stochastic,dbeta,i
+r_i,r[i],stochastic,dbin,i
+N,N (count),data,,
