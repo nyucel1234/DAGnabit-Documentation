@@ -1,0 +1,12 @@
+id,label,type
+alpha,alpha,stochastic
+beta,beta,stochastic
+A,"A = exp(alpha)",deterministic
+B,"B = exp(beta)",deterministic
+p,"p[i,j]",deterministic
+xa,"xa[i,j]",deterministic
+xs,"xs[i,j]",deterministic
+y,"y[i,j]",stochastic
+Y,"Y[i,j] (observed)",data
+Dogs,"Dogs (count)",data
+Trials,"Trials (count)",data

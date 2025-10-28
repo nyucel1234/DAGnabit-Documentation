@@ -1,18 +1,21 @@
-# Resolves fixture CSV paths for examples (rats, pumps)
-path_fixture <- function(example = c("rats","pumps"),
-                         file = c("nodes","edges")) {
-  example <- match.arg(example)
-  file    <- match.arg(file)
-  fname   <- if (file == "nodes") "nodes.csv" else "edges.csv"
-  
-  # 1) Preferred (new) location
-  p_new <- testthat::test_path("fixtures", example, fname)
-  if (file.exists(p_new)) return(p_new)
-  
-  # 2) Back-compat (old) location
-  p_old <- testthat::test_path("parser-examples", example, fname)
-  if (file.exists(p_old)) return(p_old)
-  
-  stop("Fixture not found for ", example, "/", fname,
-       "\nLooked in:\n - ", p_new, "\n - ", p_old)
+list_examples <- function() {
+  roots <- c(testthat::test_path("fixtures"),
+             testthat::test_path("parser-examples"))
+  roots <- roots[file.exists(roots)]
+  unique(unlist(lapply(roots, function(d)
+    list.dirs(d, full.names = FALSE, recursive = FALSE))))
+}
+
+path_fixture <- function(example, file = c("nodes","edges")) {
+  # validate example against discovered dirs
+  stopifnot(example %in% list_examples())
+  file  <- match.arg(file)
+  fname <- if (file == "nodes") "nodes.csv" else "edges.csv"
+  cand <- c(
+    testthat::test_path("fixtures",        example, fname),
+    testthat::test_path("parser-examples", example, fname)
+  )
+  cand <- cand[file.exists(cand)]
+  if (length(cand)) return(cand[[1]])
+  stop("Fixture not found for ", example, "/", fname)
 }

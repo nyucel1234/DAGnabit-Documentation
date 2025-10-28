@@ -22,5 +22,5 @@ test_that("parser fixtures are self-consistent", {
                 info = paste("Unknown `to` ids:",   paste(unknown_to,   collapse=", ")))
   }
   
-  for (ex in c("rats","pumps")) check_one(ex)
+  for (ex in c("rats","pumps", "dogs")) check_one(ex)
 })
