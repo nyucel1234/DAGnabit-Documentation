@@ -1,6 +1,8 @@
 ---
 title: "pumps"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    self_contained: true
 vignette: >
   %\VignetteIndexEntry{pumps}
   %\VignetteEngine{knitr::rmarkdown}
@@ -8,17 +10,68 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE, comment = "#>",
-  fig.width = 7, fig.height = 4.8,
-  message = FALSE, warning = FALSE
-)
+# --- Libraries
 suppressPackageStartupMessages({
-  library(dplyr); library(tidyr); library(ggplot2); library(coda)
-  library(rjags); library(knitr)
+  library(knitr); library(readr); library(here)
+  library(dplyr); library(tidyr); library(ggplot2)
+  library(coda);  library(rjags)
   library(dagnabit.docs)
 })
+
+# --- knitr defaults + knit from repo root
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE, warning = FALSE,
+                      fig.width = 7, fig.height = 4.8)
+knitr::opts_knit$set(root.dir = rprojroot::find_package_root_file())
+cat("Vignette ROOT =", here::here(), "\n")
+
+# --- tiny helpers used by the vignettes -----------------------------
+
+# Prefer an installed package file (inst/...) if available; otherwise fall back to repo paths
+pkg_file <- function(...) {
+  p <- system.file(..., package = "dagnabit.docs")
+  if (nzchar(p)) return(p)           # when knitting after install/build
+  file.path("inst", ...)             # when knitting from source
+}
+
+# Build a path from the repo root
+rp <- function(...) here::here(...)
+
+# Read CSV from a repo path with a sanity check
+rp_csv <- function(...) {
+  p <- rp(...)
+  stopifnot(file.exists(p))
+  readr::read_csv(p, show_col_types = FALSE)
+}
+
+# Locate a fixture file:
+#   1) inst/extdata/examples/<example>/<file>  (after install/build)
+#   2) tests/testthat/<fixtures-or-parser-examples>/<example>/<file>  (from source)
+find_fixture <- function(example, fname) {
+  # Prefer packaged location
+  p <- pkg_file("extdata", "examples", example, fname)
+  if (nzchar(p) && file.exists(p)) return(p)
+
+  # Choose the right dev directory name automatically
+  dev_dir <- if (dir.exists(rp("tests", "testthat", "fixtures", example))) {
+    "fixtures"
+  } else {
+    "parser-examples"
+  }
+
+  rp("tests", "testthat", dev_dir, example, fname)
+}
+
+# Read a fixture (nodes/edges tables)
+read_fixture <- function(example, fname) {
+  readr::read_csv(find_fixture(example, fname), show_col_types = FALSE)
+}
 set.seed(123)
+
+```
+
+```{r load-fixtures}
+pumps_nodes <- rp_csv("tests","testthat","fixtures","pumps","nodes.csv")
+pumps_edges <- rp_csv("tests","testthat","fixtures","pumps","edges.csv")
 ```
 
 ---
@@ -61,38 +114,42 @@ if (!length(p)) {
 ### B) Official WinBUGS diagram
 
 ```{r pumps-diagram, echo=FALSE, fig.cap="Official WinBUGS 'Pumps' graphical model"}
-paths <- c(
-system.file("extdata/winbugs/pumps_diagram.png", package = "dagnabit.docs"),
-"inst/extdata/winbugs/pumps_diagram.png",
-"../inst/extdata/winbugs/pumps_diagram.png",
-"../../inst/extdata/winbugs/pumps_diagram.png"
-)
-paths <- paths[nzchar(paths)]
-img <- paths[which(file.exists(paths))[1]]
-if (!length(img)) {
-cat("Diagram not found. Add `inst/extdata/winbugs/pumps_diagram.png` and re-knit.\n")
-} else {
-knitr::include_graphics(img)
-}
+knitr::include_graphics("fig/pumps_diagram.png")
 ```
 
 ### C) Nodes and Edges
 
 ```{r rats-fixtures, message=FALSE, warning=FALSE}
-library(readr)
-pkg <- "dagnabit.docs"
+find_fixture <- function(example, fname) {
+  # 1) prefer inst/extdata when built/installed
+  p1 <- pkg_file("extdata", "examples", example, fname)
+  if (file.exists(p1)) return(p1)
 
-pumps_nodes <- readr::read_csv(
-  system.file("extdata/examples/pumps/nodes.csv", package = pkg),
-  show_col_types = FALSE
-)
-pumps_edges <- readr::read_csv(
-  system.file("extdata/examples/pumps/edges.csv", package = pkg),
-  show_col_types = FALSE
-)
+  # 2) fallback(s) for local dev
+  p2 <- rp("tests", "testthat", "fixtures",          example, fname)
+  if (file.exists(p2)) return(p2)
+
+  p3 <- rp("tests", "testthat", "parser-examples",   example, fname)
+  if (file.exists(p3)) return(p3)
+
+  stop("Fixture not found in inst/extdata or tests/testthat/* for ",
+       example, "/", fname)
+}
+
+read_fixture <- function(example, fname) {
+  readr::read_csv(find_fixture(example, fname), show_col_types = FALSE)
+}
+
+# ---- Pumps ----
+pumps_nodes <- read_fixture("pumps", "nodes.csv")
+pumps_edges <- read_fixture("pumps", "edges.csv")
+
+# ---- Rats ----
+rats_nodes  <- read_fixture("rats",  "nodes.csv")
+rats_edges  <- read_fixture("rats",  "edges.csv")
 
 # quick sanity
-list(n_nodes = nrow(pumps_nodes), n_edges = nrow(pumps_edges))
+list(pumps = c(n_nodes = nrow(pumps_nodes), n_edges = nrow(pumps_edges)))
 ```
 
 
