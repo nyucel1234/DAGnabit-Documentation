@@ -1,0 +1,13 @@
+from,to,kind
+mu_i,pc_i,directed
+mu_i,pt_i,directed
+delta_i,pt_i,directed
+pc_i,rc_i,directed
+nc_i,rc_i,directed
+pt_i,rt_i,directed
+nt_i,rt_i,directed
+d,delta_i,directed
+tau,delta_i,directed
+d,delta_new,directed
+tau,delta_new,directed
+sigma,tau,directed

@@ -1,0 +1,14 @@
+id,label,type,dist,plates
+i,i,index,,
+mu_i,mu[i],stochastic,dnorm,i
+pc_i,pc[i],deterministic,,i
+pt_i,pt[i],deterministic,,i
+delta_i,delta[i],stochastic,dnorm,i
+rc_i,rc[i],stochastic,dbin,i
+rt_i,rt[i],stochastic,dbin,i
+nc_i,nc[i],data,,i
+nt_i,nt[i],data,,i
+d,d,stochastic,dnorm,
+tau,tau,stochastic,dgamma,
+sigma,sigma,deterministic,,
+delta_new,delta.new,stochastic,dnorm,
