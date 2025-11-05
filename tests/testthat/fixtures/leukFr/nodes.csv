@@ -1,0 +1,35 @@
+id,label,type,dist,plates
+i,i,index,,
+j,j,index,,
+k,k,index,,
+
+plate_i,"i plate",plate,,
+plate_j,"j plate",plate,,
+plate_k,"k plate",plate,,
+
+beta,beta,stochastic,"dnorm(0,0.000001)",
+sigma,sigma,stochastic,"dunif(0,100)",
+tau,tau,deterministic,"1/(sigma*sigma)",
+c,c,deterministic,,
+r,r,deterministic,,
+
+b_k,"b[k]",stochastic,"dnorm(0,tau)","k"
+
+Z_i,"Z[i]",data,,"i"
+obs_t_i,"obs.t[i]",data,,"i"
+fail_i,"fail[i]",data,,"i"
+pair_i,"pair[i]",data,,"i"
+t_j,"t[j]",data,,"j"
+t_next_j,"t[j+1]",data,,"j"
+eps,eps,data,,
+
+Y_ij,"Y[i,j]",deterministic,,"i,j"
+Idt_ij,"Idt[i,j]",deterministic,,"i,j"
+dN_ij,"dN[i,j]",stochastic,"dpois(Idt[i,j])","i,j"
+
+dL0_j,"dL0[j]",stochastic,"dgamma(mu[j], c)","j"
+mu_j,"mu[j]",deterministic,,"j"
+dL0_star_j,"dL0.star[j]",deterministic,,"j"
+
+S_treat_j,"S.treat[j]",deterministic,,"j"
+S_placebo_j,"S.placebo[j]",deterministic,,"j"

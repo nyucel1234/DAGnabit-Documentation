@@ -1,0 +1,24 @@
+id,label,type,dist,plates
+i,i,index,,
+plate_i,"i plate",plate,,
+
+x_i,"x[i]",data,,i
+
+y_i,"y[i]",stochastic,"dbin(P_state1_i, t_i)",i
+t_i,"t[i]",deterministic,,i
+
+state_i,"state[i]",stochastic,"dbern(theta)",i
+state1_i,"state1[i]",deterministic,,i
+
+P1,"P[1]",deterministic,,
+P2,"P[2]",deterministic,,
+
+P_state1_i,"P[state1[i]]",deterministic,,i
+prop_i,"prop[i]",deterministic,,i
+
+alpha,alpha,stochastic,"dnorm(0,1.0E-4)",
+p,p,deterministic,,
+beta,beta,deterministic,,
+
+delta,delta,stochastic,"dnorm(0,1.0E-4)",
+theta,theta,deterministic,,

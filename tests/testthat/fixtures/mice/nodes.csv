@@ -1,0 +1,19 @@
+id,label,type,dist,plates
+i,i,index,,
+j,j,index,,
+
+plate_i,i plate,plate,,
+plate_j,j plate,plate,,
+
+t_cen_ij,"t.cen[i,j]",data,,"i,j"
+
+r,r,stochastic,dexp,
+beta_i,beta[i],stochastic,dnorm,"i"
+
+mu_i,mu[i],deterministic,exp(beta[i]),"i"
+t_ij,"t[i,j]",stochastic,"dweib(r, mu[i])","i,j"
+median_i,median[i],deterministic,"pow(log(2) * exp(-beta[i]), 1/r)","i"
+
+veh_control,veh.control,deterministic,,
+test_sub,test.sub,deterministic,,
+pos_control,pos.control,deterministic,,

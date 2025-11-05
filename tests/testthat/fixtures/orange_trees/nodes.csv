@@ -1,0 +1,27 @@
+id,label,type,dist,plates
+i,i,index,,
+j,j,index,,
+k,k,index,,
+
+plate_i,"i plate",plate,,
+plate_j,"j plate",plate,,
+plate_k,"k plate",plate,,
+
+Y_ij,"Y[i,j]",stochastic,"dnorm(eta[i,j], tauC)","i,j"
+eta_ij,"eta[i,j]",deterministic,,"i,j"
+
+x_j,"x[j]",data,,"j"
+
+phi_i1,"phi[i,1]",deterministic,,"i"
+phi_i2,"phi[i,2]",deterministic,,"i"
+phi_i3,"phi[i,3]",deterministic,,"i"
+
+theta_i_k,"theta[i,k]",stochastic,"dnorm(mu[k], tau[k])","i,k"
+
+mu_k,"mu[k]",stochastic,"dnorm(0,1.0E-4)","k"
+tau_k,"tau[k]",stochastic,"dgamma(1.0E-3,1.0E-3)","k"
+sigma_k,"sigma[k]",deterministic,1/sqrt(tau[k]),"k"
+
+tauC,tauC,stochastic,"dgamma(1.0E-3,1.0E-3)",
+sigmaC,sigmaC,deterministic,1/sqrt(tauC),
+varC,varC,deterministic,1/tauC,

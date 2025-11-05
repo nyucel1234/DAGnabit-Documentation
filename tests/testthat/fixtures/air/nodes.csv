@@ -1,0 +1,19 @@
+id,label,type,dist,plates
+j,j,index,,
+plate_j,"j plate",plate,,
+
+y_j,"y[j]",stochastic,"dbin(p_j, n_j)","j"
+p_j,"p[j]",deterministic,,"j"
+
+X_j,"X[j]",stochastic,"dnorm(mu[j], tau)","j"
+mu_j,"mu[j]",deterministic,,"j"
+
+n_j,"n[j]",data,,"j"
+Z_j,"Z[j]",data,,"j"
+
+theta1,"theta[1]",stochastic,"dnorm(0,0.001)",
+theta2,"theta[2]",stochastic,"dnorm(0,0.001)",
+
+tau,tau,data,,
+alpha,alpha,data,,
+beta,beta,data,,

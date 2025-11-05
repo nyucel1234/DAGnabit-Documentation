@@ -1,0 +1,16 @@
+from,to,kind
+mu_ij,Y_ij,stochastic
+tauC,Y_ij,stochastic
+
+beta_i_vec,mu_ij,deterministic
+x_j,mu_ij,deterministic
+
+mu_beta_vec,beta_i_vec,stochastic
+R_mat,beta_i_vec,stochastic
+
+mean_vec,mu_beta_vec,stochastic
+prec_mat,mu_beta_vec,stochastic
+
+Omega_mat,R_mat,stochastic
+
+tauC,sigma,deterministic

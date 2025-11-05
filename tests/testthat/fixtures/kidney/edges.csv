@@ -1,0 +1,16 @@
+from,to,kind
+alpha,mu_ij,deterministic
+beta_age,mu_ij,deterministic
+age_ij,mu_ij,deterministic
+beta_sex,mu_ij,deterministic
+sex_i,mu_ij,deterministic
+beta_dis_k,mu_ij,deterministic
+disease_i,mu_ij,deterministic
+b_i,mu_ij,deterministic
+
+mu_ij,t_ij,stochastic
+r,t_ij,stochastic
+t_cen_ij,t_ij,deterministic
+
+sigma,tau,deterministic
+tau,b_i,stochastic

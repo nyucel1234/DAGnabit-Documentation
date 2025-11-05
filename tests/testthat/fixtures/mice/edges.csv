@@ -1,0 +1,13 @@
+from,to,kind
+beta_i,mu_i,deterministic
+
+r,t_ij,stochastic
+mu_i,t_ij,stochastic
+t_cen_ij,t_ij,stochastic
+
+beta_i,median_i,deterministic
+r,median_i,deterministic
+
+beta_i,veh_control,deterministic
+beta_i,test_sub,deterministic
+beta_i,pos_control,deterministic

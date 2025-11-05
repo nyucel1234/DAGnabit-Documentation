@@ -1,0 +1,21 @@
+id,label,type,dist,plates
+i,i,index,,
+j,j,index,,
+k,k,index,,
+
+plate_i,"i plate",plate,,
+plate_j,"j plate",plate,,
+plate_k,"k plate",plate,,
+
+beta0,beta0,stochastic,"dnorm(0,0.001)",
+beta1,beta1,stochastic,"dnorm(0,0.001)",
+
+age_j,"age[j]",data,,"j"
+mu_j,"mu[j]",deterministic,,"j"
+
+Y_iM,"Y[i,1:M]",stochastic,"dmnorm(mu[], Omega[ , ])","i"
+
+Omega_jk,"Omega[ , ]",stochastic,"dwish(R[ , ], 4)","j,k"
+Sigma_jk,"Sigma[ , ]",deterministic,"inverse(Omega[ , ])","j,k"
+
+R_jk,"R[ , ]",data,,"j,k"

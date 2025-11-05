@@ -1,0 +1,33 @@
+id,label,type,dist,plates
+i,i,index,,
+j,j,index,,
+k,k,index,,
+l,l,index,,
+
+plate_i,"i plate",plate,,
+plate_j,"j plate",plate,,
+plate_k,"k plate",plate,,
+plate_l,"l plate",plate,,
+
+Y_ij,"Y[i,j]",stochastic,"dnorm(eta[i,j], tauC)","i,j"
+eta_ij,"eta[i,j]",deterministic,,"i,j"
+
+x_j,"x[j]",data,,"j"
+
+phi_i1,"phi[i,1]",deterministic,,"i"
+phi_i2,"phi[i,2]",deterministic,,"i"
+phi_i3,"phi[i,3]",deterministic,,"i"
+
+theta_i_vec,"theta[i,1:3]",stochastic,"dmnorm(mu[1:3], tau[1:3,1:3])","i"
+
+mu_vec,"mu[1:3]",stochastic,"dmnorm(mean[1:3], prec[1:3,1:3])",
+tau_mat,"tau[1:3,1:3]",stochastic,"dwish(R[1:3,1:3], 3)",
+sigma2_mat,"sigma2[1:3,1:3]",deterministic,"inverse(tau[1:3,1:3])",
+sigma_k,"sigma[k]",deterministic,"sqrt(sigma2[i,i])","k"
+
+mean_k,"mean[k]",data,,"k"
+prec_k_l,"prec[k,l]",data,,"k,l"
+R_k_l,"R[k,l]",data,,"k,l"
+
+tauC,tauC,stochastic,"dgamma(1.0E-3,1.0E-3)",
+sigmaC,sigmaC,deterministic,"1/sqrt(tauC)",
