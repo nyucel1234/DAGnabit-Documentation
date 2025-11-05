@@ -1,0 +1,14 @@
+from,to,kind
+P_state1_i,y_i,stochastic
+t_i,y_i,stochastic
+x_i,t_i,deterministic
+y_i,t_i,deterministic
+state_i,state1_i,deterministic
+state1_i,P_state1_i,deterministic
+P1,P_state1_i,deterministic
+P2,P_state1_i,deterministic
+P_state1_i,prop_i,deterministic
+alpha,p,deterministic
+alpha,beta,deterministic
+delta,theta,deterministic
+p,P1,deterministic

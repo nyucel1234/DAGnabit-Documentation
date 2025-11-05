@@ -1,0 +1,22 @@
+id,label,type,dist,plates
+i,i,index,,
+j,j,index,,
+
+plate_i,"i plate",plate,,
+plate_j,"j plate",plate,,
+
+Y_ij,"Y[i,j]",stochastic,"dnorm(mu[i,j], tauC)","i,j"
+mu_ij,"mu[i,j]",deterministic,,"i,j"
+
+x_j,"x[j]",data,,"j"
+
+beta_i_vec,"beta[i,1:2]",stochastic,"dmnorm(mu.beta[], R[ , ])","i"
+
+mu_beta_vec,"mu.beta[1:2]",stochastic,"dmnorm(mean[], prec[ , ])",
+R_mat,"R[1:2,1:2]",stochastic,"dwish(Omega[ , ], 2)",
+Omega_mat,"Omega[ , ]",data,,
+mean_vec,"mean[]",data,,
+prec_mat,"prec[ , ]",data,,
+
+tauC,tauC,stochastic,"dgamma(0.001,0.001)",
+sigma,sigma,deterministic,"1/sqrt(tauC)",

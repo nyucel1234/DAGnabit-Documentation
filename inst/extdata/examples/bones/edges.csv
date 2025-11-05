@@ -1,0 +1,7 @@
+"from","to","kind"
+"theta_i","Q_ijk","deterministic"
+"delta_j","Q_ijk","deterministic"
+"gamma_jk","Q_ijk","deterministic"
+"Q_ijk","p_ij","deterministic"
+"ncat_j","p_ij","deterministic"
+"p_ij","grade_ij","stochastic"

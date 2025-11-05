@@ -1,0 +1,21 @@
+id,label,type,dist,plates
+i,i,index,,
+j,j,index,,
+k,k,index,,
+
+plate_i,"i plate",plate,,
+plate_j,"j plate",plate,,
+plate_k,"k plate",plate,,
+
+X_ijk,"X[i,j,k]",stochastic,"dpois(mu[i,j,k])","i,j,k"
+mu_ijk,"mu[i,j,k]",deterministic,,"i,j,k"
+
+lambda_ij,"lambda[i,j]",stochastic,"dnorm(0,0.00001)","i,j"
+alpha_k,"alpha[k]",stochastic,"dnorm(0,0.00001)","k"
+beta_ik,"beta[i,k]",stochastic,"dnorm(0,0.00001)","i,k"
+gamma_jk,"gamma[j,k]",stochastic,"dnorm(0,0.00001)","j,k"
+
+b_ik,"b[i,k]",deterministic,,"i,k"
+g_jk,"g[j,k]",deterministic,,"j,k"
+mean_beta_k,"mean(beta[,k])",deterministic,,"k"
+mean_gamma_k,"mean(gamma[,k])",deterministic,,"k"

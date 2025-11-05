@@ -1,0 +1,11 @@
+from,to,kind
+p_j,y_j,stochastic
+n_j,y_j,stochastic
+theta1,p_j,deterministic
+theta2,p_j,deterministic
+X_j,p_j,deterministic
+mu_j,X_j,stochastic
+tau,X_j,stochastic
+alpha,mu_j,deterministic
+beta,mu_j,deterministic
+Z_j,mu_j,deterministic

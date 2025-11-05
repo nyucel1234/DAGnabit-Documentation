@@ -1,0 +1,11 @@
+from,to,kind
+alpha,mu_i,deterministic
+beta,mu_i,deterministic
+gamma,mu_i,deterministic
+x_i,mu_i,deterministic
+
+mu_i,Y_i,stochastic
+tau,Y_i,stochastic
+
+tau,sigma,deterministic
+gamma,U3,deterministic

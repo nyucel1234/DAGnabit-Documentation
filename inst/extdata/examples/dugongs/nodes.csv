@@ -1,0 +1,14 @@
+id,label,type,dist,plates
+i,i,index,,
+plate_i,"i plate",plate,,
+
+alpha,alpha,stochastic,"dnorm(0,1.0E-6)",
+beta,beta,stochastic,"dnorm(0,1.0E-6)",
+gamma,gamma,stochastic,"dunif(0.5,1.0)",
+tau,tau,stochastic,"dgamma(0.001,0.001)",
+sigma,sigma,deterministic,1/sqrt(tau),
+U3,U3,deterministic,logit(gamma),
+
+x_i,"x[i]",data,,i
+mu_i,"mu[i]",deterministic,,i
+Y_i,"Y[i]",stochastic,"dnorm(mu[i], tau)",i
