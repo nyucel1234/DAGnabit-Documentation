@@ -1,0 +1,13 @@
+id,label,type,dist,plates
+j,"j",index,,
+k,"k",index,,
+plate_j,"j plate",plate,,
+plate_k,"k plate",plate,,
+theta_j,"theta[j]",stochastic,dnorm,"j"
+alpha_k,"alpha[k]",stochastic,dnorm,"k"
+beta,beta,stochastic,dnorm,
+eta_jk,"eta[j,k]",deterministic,,"j,k"
+p_jk,"p[j,k]",deterministic,invlogit(beta * theta[j] - alpha[k]),"j,k"
+r_jk,"r[j,k]",stochastic,"dbern(p[j,k])","j,k"
+alpha_bar,"mean(alpha[])",deterministic,,
+a_k,"a[k]",deterministic,alpha[k] - alpha_bar,"k"

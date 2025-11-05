@@ -1,0 +1,10 @@
+from,to,kind
+beta,eta_jk,deterministic
+theta_j,eta_jk,deterministic
+alpha_k,eta_jk,deterministic
+eta_jk,p_jk,deterministic
+p_jk,r_jk,stochastic
+alpha_k,alpha_bar,deterministic
+alpha_k,a_k,deterministic
+alpha_bar,a_k,deterministic
+

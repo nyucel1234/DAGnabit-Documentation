@@ -1,0 +1,17 @@
+id,label,type,dist,plates
+i,i,index,,
+plate_i,"i plate",plate,,
+
+r_i,"r[i]",stochastic,"dbin(p_i, n_i)","i"
+p_i,"p[i]",deterministic,,"i"
+rhat_i,"rhat[i]",deterministic,,"i"
+
+n_i,"n[i]",data,,"i"
+x_i,"x[i]",data,,"i"
+
+x_all,"x[]",data,,
+mean_x,"mean(x[])",deterministic,,
+
+alpha_star,alpha.star,stochastic,"dnorm(0,0.001)",
+beta,beta,stochastic,"dnorm(0,0.001)",
+alpha,alpha,deterministic,,

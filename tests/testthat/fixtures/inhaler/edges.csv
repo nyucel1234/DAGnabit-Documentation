@@ -1,0 +1,10 @@
+from,to,kind
+a_j,eta_itj,deterministic
+mu_gt,eta_itj,deterministic
+b_i,eta_itj,deterministic
+eta_itj,Q_itj,deterministic
+Q_itj,p_itj,deterministic
+p_itj,response_it,stochastic
+tau,b_i,stochastic
+group_i,mu_gt,deterministic
+
