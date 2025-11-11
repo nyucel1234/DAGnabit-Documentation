@@ -10,4 +10,4 @@ phi,theta,deterministic
 theta,equiv,deterministic
 tau1,sigma1,deterministic
 sigma2,tau2,deterministic
-
+tau2,delta_i,stochastic
