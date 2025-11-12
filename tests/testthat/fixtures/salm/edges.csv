@@ -1,9 +1,9 @@
 from,to,kind
-mu_ij,y_ij,stochastic
-alpha,mu_ij,deterministic
-beta,mu_ij,deterministic
-gamma,mu_ij,deterministic
-x_i,mu_ij,deterministic
-lambda_ij,mu_ij,deterministic
-tau,lambda_ij,stochastic
-sigma,tau,deterministic
+"mu[i,j]","y[i,j]","stochastic"
+"alpha","mu[i,j]","deterministic"
+"beta","mu[i,j]","deterministic"
+"gamma","mu[i,j]","deterministic"
+"x[i]","mu[i,j]","deterministic"
+"lambda[i,j]","mu[i,j]","deterministic"
+"tau","lambda[i,j]","stochastic"
+"sigma","tau","deterministic"
