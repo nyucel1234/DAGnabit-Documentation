@@ -6,7 +6,7 @@ test_that("parser fixtures are self-consistent", {
     edges <- read.csv(path_fixture(ex, "edges"), stringsAsFactors = FALSE)
     
     # 1) required columns
-    expect_true(all(c("id","label","type") %in% names(nodes)))
+    expect_true(all(c("id","label","type", "plates") %in% names(nodes)))
     expect_true(all(c("from","to","kind") %in% names(edges)))
     
     # 2) node ids: non-empty & unique
