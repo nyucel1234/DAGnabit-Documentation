@@ -1,21 +1,12 @@
 from,to,kind
-p_smoking_vec,smoking,stochastic
-
-asia,p_tuberculosis_idx,deterministic
-p_tuberculosis_idx,tuberculosis,stochastic
-
-smoking,p_lung_cancer_idx,deterministic
-p_lung_cancer_idx,lung_cancer,stochastic
-
-smoking,p_bronchitis_idx,deterministic
-p_bronchitis_idx,bronchitis,stochastic
+asia,tuberculosis,stochastic
+smoking,lung_cancer,stochastic
+smoking,bronchitis,stochastic
 
 tuberculosis,either,deterministic
 lung_cancer,either,deterministic
 
-either,p_xray_idx,deterministic
-p_xray_idx,xray,stochastic
+either,xray,stochastic
+either,dyspnoea,stochastic
+bronchitis,dyspnoea,stochastic
 
-either,p_dyspnoea_idx,deterministic
-bronchitis,p_dyspnoea_idx,deterministic
-p_dyspnoea_idx,dyspnoea,stochastic
