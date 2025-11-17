@@ -1,19 +1,15 @@
-id,label,type,dist,plates
-j,j,index,,
-plate_j,"j plate",plate,,
+id,label,type,plates
+j,j,index,
+plate_j,j plate,plate,
+y[j],"y[j]",stochastic,"for(j in 1:J)"
+p[j],"p[j]",deterministic,"for(j in 1:J)"
+X[j],"X[j]",stochastic,"for(j in 1:J)"
+mu[j],"mu[j]",deterministic,"for(j in 1:J)"
+n[j],"n[j]",deterministic,"for(j in 1:J)"
+Z[j],"Z[j]",deterministic,"for(j in 1:J)"
 
-y_j,"y[j]",stochastic,"dbin(p_j, n_j)","j"
-p_j,"p[j]",deterministic,,"j"
-
-X_j,"X[j]",stochastic,"dnorm(mu[j], tau)","j"
-mu_j,"mu[j]",deterministic,,"j"
-
-n_j,"n[j]",data,,"j"
-Z_j,"Z[j]",data,,"j"
-
-theta1,"theta[1]",stochastic,"dnorm(0,0.001)",
-theta2,"theta[2]",stochastic,"dnorm(0,0.001)",
-
-tau,tau,data,,
-alpha,alpha,data,,
-beta,beta,data,,
+theta1,"theta[1]",stochastic,
+theta2,"theta[2]",stochastic,
+tau,tau,deterministic,
+alpha,alpha,deterministic,
+beta,beta,deterministic,
