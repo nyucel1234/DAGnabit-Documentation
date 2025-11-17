@@ -3,10 +3,10 @@ id,label,type,plates
 "j","j","index",NA
 "plate_i","i plate","plate",NA
 "plate_j","j plate","plate",NA
-"Y[i,j]","Y[i,j]","stochastic","i,j"
-"mu[i,j]","mu[i,j]","deterministic","i,j"
-"alpha[i]","alpha[i]","stochastic","i"
-"beta[i]","beta[i]","stochastic","i"
+"Y[i,j]","Y[i,j]","stochastic","for(i in 1:N); for(j in 1:T)"
+"mu[i,j]","mu[i,j]","deterministic","for(i in 1:N); for(j in 1:T)"
+"alpha[i]","alpha[i]","stochastic","for(i in 1:N)"
+"beta[i]","beta[i]","stochastic","for(i in 1:N)"
 "alpha.c","alpha.c","stochastic",NA
 "beta.c","beta.c","stochastic",NA
 "sigma.alpha","sigma.alpha","stochastic",NA
@@ -15,7 +15,7 @@ id,label,type,plates
 "tau.beta","tau.beta","deterministic",NA
 "tau.c","tau.c","stochastic",NA
 "sigma","sigma","deterministic",NA
-"x[j]","x[j]","deterministic","j"
+"x[j]","x[j]","deterministic","for(j in 1:T)"
 "xbar","xbar","deterministic",NA
 "alpha0","alpha0","deterministic",NA
 
