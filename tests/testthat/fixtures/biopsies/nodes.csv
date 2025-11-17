@@ -1,21 +1,13 @@
-id,label,type,dist,plates
-i,i,index,,
+id,label,type,plates
+i,i,index,
+plate_i,"i plate",plate,
 
-plate_i,"i plate",plate,,
+true_i,"true[i]",stochastic,"for(i in 1:ns)"
+biopsies_ik,"biopsies[i,k]",stochastic,"for(i in 1:ns); for(k in 1:4)"
+nbiops_i,"nbiops[i]",deterministic,"for(i in 1:ns)"
 
-biopsies_i4,"biopsies[i,1:4]",stochastic,"dmulti(error[true[i], ], nbiops[i])","i"
-nbiops_i,"nbiops[i]",deterministic,,"i"
-true_i,"true[i]",stochastic,"dcat(p[])","i"
+error_2,"error[2,1:2]",stochastic,
+error_3,"error[3,1:3]",stochastic,
+error_4,"error[4,1:4]",stochastic,
 
-error_row_i,"error[true[i], ]",deterministic,,"i"
-
-error_2,"error[2,1:2]",stochastic,"ddirch(prior[1:2])",
-error_3,"error[3,1:3]",stochastic,"ddirch(prior[1:3])",
-error_4,"error[4,1:4]",stochastic,"ddirch(prior[1:4])",
-
-p_4,"p[1:4]",stochastic,"ddirch(prior[])",
-
-prior_1_2,"prior[1:2]",data,,
-prior_1_3,"prior[1:3]",data,,
-prior_1_4,"prior[1:4]",data,,
-prior_all,"prior[]",data,,
+p,"p[1:4]",stochastic,
