@@ -1,22 +1,21 @@
-id,label,type,dist,plates
-i,i,index,NA,NA
-j,j,index,NA,NA
-plate_i,i plate,plate,NA,NA
-plate_j,j plate,plate,NA,NA
-Y_ij,"Y[i,j]",stochastic,dnorm,"i,j"
-mu_ij,"mu[i,j]",deterministic,NA,"i,j"
-alpha_i,alpha[i],stochastic,dnorm,i
-beta_i,beta[i],stochastic,dnorm,i
-alpha_c,alpha.c,stochastic,dnorm,NA
-beta_c,beta.c,stochastic,dnorm,NA
-sigma_alpha,sigma.alpha,stochastic,dunif,NA
-sigma_beta,sigma.beta,stochastic,dunif,NA
-tau_alpha,tau.alpha,deterministic,NA,NA
-tau_beta,tau.beta,deterministic,NA,NA
-tau_c,tau.c,stochastic,dgamma,NA
-sigma,sigma,deterministic,NA,NA
-x_j,x[j],data,NA,j
-xbar,xbar,data,NA,NA
-N,N,data,NA,NA
-T,T,data,NA,NA
-alpha0,alpha0,deterministic,NA,NA
+id,label,type,plates
+"i","i","index",NA
+"j","j","index",NA
+"plate_i","i plate","plate",NA
+"plate_j","j plate","plate",NA
+"Y[i,j]","Y[i,j]","stochastic","i,j"
+"mu[i,j]","mu[i,j]","deterministic","i,j"
+"alpha[i]","alpha[i]","stochastic","i"
+"beta[i]","beta[i]","stochastic","i"
+"alpha.c","alpha.c","stochastic",NA
+"beta.c","beta.c","stochastic",NA
+"sigma.alpha","sigma.alpha","stochastic",NA
+"sigma.beta","sigma.beta","stochastic",NA
+"tau.alpha","tau.alpha","deterministic",NA
+"tau.beta","tau.beta","deterministic",NA
+"tau.c","tau.c","stochastic",NA
+"sigma","sigma","deterministic",NA
+"x[j]","x[j]","deterministic","j"
+"xbar","xbar","deterministic",NA
+"alpha0","alpha0","deterministic",NA
+
