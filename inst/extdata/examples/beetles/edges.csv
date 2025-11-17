@@ -8,10 +8,7 @@ p_i,rhat_i,deterministic
 alpha_star,p_i,deterministic
 beta,p_i,deterministic
 x_i,p_i,deterministic
-mean_x,p_i,deterministic
-
-x_all,mean_x,deterministic
 
 alpha_star,alpha,deterministic
 beta,alpha,deterministic
-mean_x,alpha,deterministic
+
