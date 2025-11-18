@@ -1,17 +1,12 @@
-id,label,type,dist,plates
-i,i,index,,
-j,j,index,,
+id,label,type,plates
+i,i,index,
+j,j,index,
+plate_i,"i plate",plate,
+plate_j,"j plate",plate,
 
-plate_i,"i plate",plate,,
-plate_j,"j plate",plate,,
-
-Y_iJ,"Y[i,1:J]",stochastic,"dmulti(p[i,1:J], 1)","i"
-p_iJ,"p[i,1:J]",deterministic,,"i"
-p_ij,"p[i,j]",deterministic,,"i,j"
-
-e_ij,"e[i,j]",deterministic,,"i,j"
-e_sum_i,"sum(e[i,])",deterministic,,"i"
-
-est_ij,"est[i,j]",deterministic,,"i,j"
-
-beta,beta,stochastic,"dnorm(0,1.0E-6)",
+Y_iJ,"Y[i,1:J]",stochastic,"for(i in 1:I)"
+p_ij,"p[i,j]",deterministic,"for(i in 1:I); for(j in 1:J) "
+e_sum_i,"sum(e[i,])",deterministic,"for(i in 1:I)"
+est_ij,"est[i,j]",deterministic,"for(i in 1:I); for(j in 1:J)"
+beta,beta,stochastic,
+e_ij,"e[i,j]",deterministic,"for(i in 1:I); for(j in 1:J)"
