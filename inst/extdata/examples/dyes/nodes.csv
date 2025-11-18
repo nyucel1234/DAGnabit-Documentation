@@ -1,12 +1,11 @@
 id,label,type,plates
 i,i,index,
 j,j,index,
-plate_i,i plate,plate,
-plate_j,j plate,plate,
-
+plate_i,"i plate",plate,
+plate_j,"j plate",plate,
 theta,theta,stochastic,
-mu_i,mu[i],stochastic,"for(i in 1:batches)"
-y_ij,y[i,j],stochastic,"for(i in 1:batches); for(j in 1:samples)"
+mu_i,"mu[i]",stochastic,"for(i in 1:batches)"
+y_ij,"y[i,j]",stochastic,"for(i in 1:batches); for(j in 1:samples)"
 tau_with,tau.with,stochastic,
 sigma2_with,sigma2.with,deterministic,
 ICC,ICC,stochastic,
