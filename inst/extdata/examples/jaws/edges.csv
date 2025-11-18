@@ -1,10 +1,10 @@
 from,to,kind
-mu_j,Y_iM,stochastic
-Omega_jk,Y_iM,stochastic
+mu_j,Y_i,stochastic
+Omega,Y_i,stochastic
 
 beta0,mu_j,deterministic
 beta1,mu_j,deterministic
 age_j,mu_j,deterministic
 
-R_jk,Omega_jk,stochastic
-Omega_jk,Sigma_jk,deterministic
+R,Omega,stochastic
+Omega,Sigma,deterministic
