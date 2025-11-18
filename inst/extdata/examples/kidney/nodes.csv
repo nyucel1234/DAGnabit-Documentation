@@ -1,25 +1,24 @@
-id,label,type,dist,plates
-i,i,index,,
-j,j,index,,
-k,k,index,,
+id,label,type,plates
+i,i,index,
+j,j,index,
+k,k,index,
+plate_i,"i plate",plate,
+plate_j,"j plate",plate,
+plate_k,"k plate",plate,
 
-plate_i,"i plate",plate,,
-plate_j,"j plate",plate,,
-plate_k,"k plate",plate,,
+alpha,alpha,stochastic,
+beta_age,"beta.age",stochastic,
+beta_sex,"beta.sex",stochastic,
+beta_dis_k,"beta.dis[k]",stochastic,"for(k in 2:4)",
+b_i,"b[i]",stochastic,"for(i in 1:N)",
+mu_ij,"mu[i,j]",deterministic,"for(i in 1:N); for(j in 1:M)",
+t_ij,"t[i,j]",stochastic,"for(i in 1:N); for(j in 1:M)",
+t_cen_ij,"t.cen[i,j]",deterministic,"for(i in 1:N); for(j in 1:M)",
 
-alpha,alpha,stochastic,"dnorm(0,0.0001)",
-beta_age,beta.age,stochastic,"dnorm(0,0.0001)",
-beta_sex,beta.sex,stochastic,"dnorm(0,0.0001)",
-beta_dis_k,"beta.dis[k]",stochastic,"dnorm(0,0.0001)","k"
-b_i,"b[i]",stochastic,"dnorm(0,tau)","i"
-sigma,sigma,stochastic,"dunif(0,100)",
-tau,tau,deterministic,"1/(sigma*sigma)",
-r,r,stochastic,"dgamma(1,0.001)",
+age_ij,"age[i,j]",deterministic,"for(i in 1:N); for(j in 1:M)",
+sex_i,"sex[i]",deterministic,"for(i in 1:N)",
+disease_i,"disease[i]",deterministic,"for(i in 1:N)",
 
-age_ij,"age[i,j]",data,,"i,j"
-sex_i,"sex[i]",data,,"i"
-disease_i,"disease[i]",data,,"i"
-t_cen_ij,"t.cen[i,j]",data,,"i,j"
-
-mu_ij,"mu[i,j]",deterministic,,"i,j"
-t_ij,"t[i,j]",stochastic,"dweib(r,mu[i,j]) I(t.cen[i,j],)","i,j"
+sigma,sigma,stochastic,
+tau,tau,deterministic,
+r,r,stochastic,
