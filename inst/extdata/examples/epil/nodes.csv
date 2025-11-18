@@ -11,7 +11,7 @@ alpha_BT,alpha.BT,stochastic,
 alpha_Age,alpha.Age,stochastic,
 alpha_V4,alpha.V4,stochastic,
 
-tau_b1,tau.b1,stochastic,,
+tau_b1,tau.b1,stochastic,
 sigma_b1,sigma.b1,deterministic,
 tau_b,tau.b,stochastic,
 sigma_b,sigma.b,deterministic,
