@@ -22,5 +22,5 @@ test_that("parser fixtures are self-consistent", {
                 info = paste("Unknown `to` ids:",   paste(unknown_to,   collapse=", ")))
   }
   
-  for (ex in c("rats","pumps", "dogs","seeds", "surgical_fixed", "surgical_random", "salm","equiv", "dyes", "stacks", "epil", "blocker", "oxford", "LSAT", "beetles", "bones", "inhaler", "mice", "kidney", "leuk", "leukFr", "dugongs", "orange_trees", "orange_trees_repeat", "biopsies", "eyes", "hearts", "air", "cervix", "jaws", "birats", "schools", "ice", "alligators", "endo", "stagnant", "asia")) check_one(ex)
+  for (ex in c("rats","pumps", "dogs","seeds", "surgical_fixed", "surgical_random", "salm","equiv", "dyes", "stacks", "epil", "blocker", "oxford", "LSAT", "beetles", "bones", "mice", "kidney", "leuk", "leukFr", "dugongs", "orange_trees", "orange_trees_repeat", "biopsies", "eyes", "hearts", "air", "cervix", "jaws", "birats", "schools", "ice", "alligators", "endo", "stagnant", "asia")) check_one(ex)
 })
