@@ -1,17 +1,19 @@
-id,label,type,dist,plates
-i,i,index,,
-plate_i,"i plate",plate,,
+id,label,type,plates
+i,i,index,
+plate_i,"i plate",plate,
 
-y_i,"y[i]",stochastic,"dnorm(mu[i], tau)","i"
-mu_i,"mu[i]",deterministic,,"i"
-T_i,"T[i]",stochastic,"dcat(P[])","i"
+alpha,"alpha[]",deterministic,
+P,"P[1:2]",stochastic, 
+theta,theta,stochastic, 
+lambda1,"lambda[1]",stochastic,
+lambda2,"lambda[2]",deterministic,
+tau,tau,stochastic,
+sigma,sigma,deterministic,
 
-P_2,"P[1:2]",stochastic,"ddirch(alpha[])", 
-alpha_all,"alpha[]",data,,
+y_i,"y[i]",stochastic,"for(i in 1:N)"
+mu_i,"mu[i]",deterministic,"for(i in 1:N)"
+T_i,"T[i]",stochastic,"for(i in 1:N)"
 
-theta,theta,stochastic,"dnorm(0,1.0E-6) I(0.0,)", 
-lambda1,"lambda[1]",stochastic,"dnorm(0,1.0E-6)",
-lambda2,"lambda[2]",deterministic,,
 
-tau,tau,stochastic,"dgamma(0.001,0.001)",
-sigma,sigma,deterministic,1/sqrt(tau),
+
+
