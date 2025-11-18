@@ -1,21 +1,21 @@
 from,to,kind
-obs_t_i,Y_ij,deterministic
-t_j,Y_ij,deterministic
-eps,Y_ij,deterministic
-
+Idt_ij,dN_ij,stochastic
 Y_ij,Idt_ij,deterministic
 beta,Idt_ij,deterministic
 Z_i,Idt_ij,deterministic
 dL0_j,Idt_ij,deterministic
 
-Idt_ij,dN_ij,stochastic
+obs_t_i,Y_ij,deterministic
+t_j,Y_ij,deterministic
+eps,Y_ij,deterministic
+
+mu_j,dL0_j,stochastic
+c,dL0_j,stochastic
 
 dL0_star_j,mu_j,deterministic
 c,mu_j,deterministic
-mu_j,dL0_j,stochastic
 
 r,dL0_star_j,deterministic
-t_next_j,dL0_star_j,deterministic
 t_j,dL0_star_j,deterministic
 
 beta,S_treat_j,deterministic

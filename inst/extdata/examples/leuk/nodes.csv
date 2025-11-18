@@ -1,29 +1,31 @@
-id,label,type,dist,plates
-i,i,index,,
-j,j,index,,
+id,label,type,plates
+i,i,index,
+j,j,index,
+plate_i,"i plate",plate,
+plate_j,"j plate",plate,
 
-plate_i,"i plate",plate,,
-plate_j,"j plate",plate,,
+beta,beta,stochastic,
+c,c,deterministic,
+r,r,deterministic,
+dN_ij,"dN[i,j]",stochastic,"for(i in 1:N); for(j in 1:T)"
+Idt_ij,"Idt[i,j]",deterministic,"for(i in 1:N); for(j in 1:T)"
+Y_ij,"Y[i,j]",deterministic,"for(i in 1:N); for(j in 1:T)"
+Z_i,"Z[i]",deterministic,"for(i in 1:N)"
+obs_t_i,"obs.t[i]",deterministic,"for(i in 1:N)"
+fail_i,"fail[i]",deterministic,"for(i in 1:N)"
+t_j,"t[j]",deterministic,"for(j in 1:T+1)"
+dL0_j,"dL0[j]",stochastic,"for(j in 1:T)"
+mu_j,"mu[j]",deterministic,"for(j in 1:T)"
+dL0_star_j,"dL0.star[j]",deterministic,"for(j in 1:T)"
+S_treat_j,"S.treat[j]",deterministic,"for(j in 1:T)"
+S_placebo_j,"S.placebo[j]",deterministic,"for(j in 1:T)"
+eps,eps,deterministic,
 
-beta,beta,stochastic,"dnorm(0,0.000001)",
-c,c,deterministic,,
-r,r,deterministic,,
 
-Z_i,"Z[i]",data,,"i"
-obs_t_i,"obs.t[i]",data,,"i"
-fail_i,"fail[i]",data,,"i"
-t_j,"t[j]",data,,"j"
-t_next_j,"t[j+1]",data,,"j"
-eps,eps,data,,
 
-Y_ij,"Y[i,j]",deterministic,,"i,j"
-Idt_ij,"Idt[i,j]",deterministic,,"i,j"
-dN_ij,"dN[i,j]",stochastic,"dpois(Idt[i,j])","i,j"
 
-dL0_j,"dL0[j]",stochastic,"dgamma(mu[j], c)","j"
-mu_j,"mu[j]",deterministic,,"j"
-dL0_star_j,"dL0.star[j]",deterministic,,"j"
 
-S_treat_j,"S.treat[j]",deterministic,,"j"
-S_placebo_j,"S.placebo[j]",deterministic,,"j"
+
+
+
 
