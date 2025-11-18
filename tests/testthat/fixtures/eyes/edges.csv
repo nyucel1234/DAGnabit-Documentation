@@ -6,9 +6,10 @@ T_i,mu_i,deterministic
 lambda1,mu_i,deterministic
 lambda2,mu_i,deterministic
 
-P_2,T_i,stochastic
+P,T_i,stochastic
 
 lambda1,lambda2,deterministic
 theta,lambda2,deterministic
 
 tau,sigma,deterministic
+alpha,P,stochastic
