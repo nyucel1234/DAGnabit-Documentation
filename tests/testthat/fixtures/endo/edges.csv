@@ -1,12 +1,7 @@
 from,to,kind
-p_iJ,Y_iJ,stochastic
-
-p_ij,p_iJ,deterministic
-
+p_ij,Y_iJ,stochastic
 e_ij,p_ij,deterministic
 e_sum_i,p_ij,deterministic
-
 beta,e_ij,deterministic
 est_ij,e_ij,deterministic
-
 e_ij,e_sum_i,deterministic
