@@ -1,35 +1,31 @@
-id,label,type,dist,plates
-i,i,index,,
-k,k,index,,
-j,j,index,,
+id,label,type,plates
+i,i,index,
+k,k,index,
+j,j,index,
+plate_i,"i plate",plate,
+plate_k,"k plate",plate,
+plate_j,"j plate",plate,
 
-plate_i,"i plate",plate,,
-plate_k,"k plate",plate,,
-plate_j,"j plate",plate,,
+cases_i,"cases[i]",stochastic,"for(i in 1:I)"
+mu_i,"mu[i]",deterministic,"for(i in 1:I)"
+pyr_i,"pyr[i]",deterministic,"for(i in 1:I)"
+age_i,"age[i]",deterministic,"for(i in 1:I)"
+year_i,"year[i]",deterministic,"for(i in 1:I)"
 
-cases_i,"cases[i]",stochastic,"dpois(mu[i])","i"
-mu_i,"mu[i]",deterministic,,"i"
+alpha1,"alpha[1]",deterministic,
+alpha_j,"alpha[j]",stochastic,"for(j in 2:Nage)"
 
-pyr_i,"pyr[i]",data,,"i"
-age_i,"age[i]",data,,"i"
-year_i,"year[i]",data,,"i"
+beta_k,"beta[k]",stochastic,"for(k in 1:K)"
+betamean_k,"betamean[k]",deterministic,"for(k in 1:K)"
+Nneighs_k,"Nneighs[k]",deterministic,"for(k in 1:K)"
+betaprec_k,"betaprec[k]",deterministic,"for(k in 1:K)"
+logRR_k,"logRR[k]",deterministic,"for(k in 1:K)"
+tau_like_k,"tau.like[k]",deterministic,"for(k in 1:K)"
+tau,tau,stochastic,
+sigma,sigma,deterministic,
+d,d,deterministic,
+r,r,deterministic,
 
-alpha_j,"alpha[j]",stochastic,"dnorm(0,1.0E-6)","j"
-alpha1,"alpha[1]",deterministic,,
-alpha_agei,"alpha[age[i]]",deterministic,,"i"
 
-beta_k,"beta[k]",stochastic,"dnorm(betamean[k], betaprec[k])","k"
-betamean_k,"betamean[k]",deterministic,,"k"
-Nneighs_k,"Nneighs[k]",deterministic,,"k"
-betaprec_k,"betaprec[k]",deterministic,,"k"
-logRR_k,"logRR[k]",deterministic,,"k"
-tau_like_k,"tau.like[k]",deterministic,,"k"
 
-beta5,"beta[5]",deterministic,,
 
-beta_yeari,"beta[year[i]]",deterministic,,"i"
-
-d,d,deterministic,,
-r,r,deterministic,,
-tau,tau,stochastic,"dgamma(r, d)",
-sigma,sigma,deterministic,"1/sqrt(tau)",
