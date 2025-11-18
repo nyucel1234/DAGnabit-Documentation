@@ -1,18 +1,14 @@
-"id","label","type","dist","plates"
-"i","i","index","",""
-"j","j","index","",""
-"k","k","index","",""
-"plate_i","i plate","plate","",""
-"plate_j","j plate","plate","",""
-"plate_k","k plate","plate","",""
-"theta_i","theta[i]","stochastic","dnorm","i"
-"delta_j","delta[j]","data","","j"
-"gamma_jk","gamma[j","k]","data",""
-"j,k","","","",""
-"Q_ijk","Q[i","j","k]","deterministic"
-"invlogit(delta[j] * (theta[i] - gamma[j","k]))","i,j,k","",""
-"ncat_j","ncat[j]","data","","j"
-"p_ij","p[i","j","1:ncat[j]]","deterministic"
-"from Q[i","j","•] and ncat[j]","i,j",""
-"grade_ij","grade[i","j]","stochastic","dcat"
-"i,j","","","",""
+id,label,type,plates
+i,i,index,
+j,j,index,
+k,k,index,
+plate_i,"i plate",plate,
+plate_j,"j plate",plate,
+plate_k,"k plate",plate,
+theta_i,"theta[i]",stochastic,"for(i in 1:nChild)"
+delta_j,"delta[j]",deterministic,"for(j in 1:nInd)"
+gamma_jk,"gamma[j,k]",deterministic,"for(j in 1:nInd); for(k in 1:ncat-1)"
+Q_ijk,"Q[i,j,k]",deterministic,"for(i in 1:nChild); for(j in 1:nInd); for(k in 1:ncat-1)"
+p_ijk,"p[i,j,k]",deterministic,"for(i in 1:nChild); for(j in 1:nInd); for(k in 1:ncat)"
+grade_ij,"grade[i,j]",stochastic,"for(i in 1:nChild); for(j in 1:nInd)"
+
