@@ -1,16 +1,15 @@
-"id","label","type","dist","plates"
-"plate_i","i plate","plate","",""
-"plate_j","j plate","plate","",""
-"i","i","index","",""
-"j","j","index","",""
-"Y_ij","Y[i,j] (observed)","data","","i,j"
-"xa_ij","xa[i,j]","deterministic","","i,j"
-"xs_ij","xs[i,j]","deterministic","","i,j"
-"p_ij","p[i,j]","deterministic","","i,j"
-"y_ij","y[i,j]","stochastic","dbern","i,j"
-"alpha","alpha","stochastic","dnorm",""
-"beta","beta","stochastic","dnorm",""
-"A","A = exp(alpha)","deterministic","",""
-"B","B = exp(beta)","deterministic","",""
-"Dogs","Dogs (count)","data","",""
-"Trials","Trials (count)","data","",""
+id,label,type,plates
+plate_i,"i plate",plate,
+plate_j,"j plate",plate,
+i,i,index,
+j,j,index,
+A,A,deterministic,
+B,B,deterministic,
+xa_ij,"xa[i,j]",deterministic,"for(i in 1:Dogs); for(j in 1:Trials)"
+xs_ij,"xs[i,j]",deterministic,"for(i in 1:Dogs); for(j in 1:Trials)"
+p_ij,"p[i,j]",deterministic,"for(i in 1:Dogs); for(j in 1:Trials)"
+y_ij,"y[i,j]",stochastic,"for(i in 1:Dogs); for(j in 1:Trials)"
+Y_ij,"Y[i,j]",deterministic,"for(i in 1:Dogs); for(j in 1:Trials)"
+alpha,alpha,stochastic,
+beta,beta,stochastic,
+
