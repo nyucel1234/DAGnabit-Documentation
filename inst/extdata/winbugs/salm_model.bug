@@ -1,0 +1,21 @@
+model {
+  for (i in 1:I) {              
+    for (j in 1:J) {            
+      y[i, j] ~ dpois(mu[i, j])
+      log(mu[i, j]) <- alpha + beta * log(x[i] + 10) + gamma * x[i] + lambda[i, j]
+      lambda[i, j] ~ dnorm(0, tau)
+    }
+  }
+
+  alpha ~ dnorm(0.0, 1.0E-6)
+  beta  ~ dnorm(0.0, 1.0E-6)
+  gamma ~ dnorm(0.0, 1.0E-6)
+
+  # PRIOR 1 on random-effects SD:
+  sigma ~ dunif(0, 100)
+  tau   <- 1 / (sigma * sigma)
+
+  # PRIOR 2 alternative (comment PRIOR 1 out if you use this):
+  tau   ~ dgamma(1.0E-3, 1.0E-3)
+  sigma <- 1 / sqrt(tau)
+}
