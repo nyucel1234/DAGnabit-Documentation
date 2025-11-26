@@ -1,8 +1,8 @@
 from,to,kind
 p[j],y[j],stochastic
 n[j],y[j],stochastic
-theta1,p[j],deterministic
-theta2,p[j],deterministic
+theta[1],p[j],deterministic
+theta[2],p[j],deterministic
 X[j],p[j],deterministic
 mu[j],X[j],stochastic
 tau,X[j],stochastic

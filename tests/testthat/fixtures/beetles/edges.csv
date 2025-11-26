@@ -1,14 +1,14 @@
 from,to,kind
-p_i,r_i,stochastic
-n_i,r_i,stochastic
+p[i],r[i],stochastic
+n[i],r[i],stochastic
 
-n_i,rhat_i,deterministic
-p_i,rhat_i,deterministic
+n[i],rhat[i],deterministic
+p[i],rhat[i],deterministic
 
-alpha_star,p_i,deterministic
-beta,p_i,deterministic
-x_i,p_i,deterministic
+alpha.star,p[i],deterministic
+beta,p[i],deterministic
+x[i],p[i],deterministic
 
-alpha_star,alpha,deterministic
+alpha.star,alpha,deterministic
 beta,alpha,deterministic
 

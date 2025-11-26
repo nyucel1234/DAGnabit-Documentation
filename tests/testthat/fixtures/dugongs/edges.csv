@@ -1,11 +1,11 @@
 from,to,kind
-alpha,mu_i,deterministic
-beta,mu_i,deterministic
-gamma,mu_i,deterministic
-x_i,mu_i,deterministic
+alpha,mu[i],deterministic
+beta,mu[i],deterministic
+gamma,mu[i],deterministic
+x[i],mu[i],deterministic
 
-mu_i,Y_i,stochastic
-tau,Y_i,stochastic
+mu[i],Y[i],stochastic
+tau,Y[i],stochastic
 
 tau,sigma,deterministic
 gamma,U3,deterministic

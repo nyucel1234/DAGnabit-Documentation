@@ -1,21 +1,21 @@
 from,to,kind
-q,x_i,stochastic
-beta0,p_i,deterministic
-beta,p_i,deterministic
-x_i,p_i,deterministic
-w_mean,p_i,deterministic
-p_i,d_i,stochastic
-x_i,x1_i,deterministic
-d_i,d1_i,deterministic
+q,x[i],stochastic
+beta0,p[i],deterministic
+beta,p[i],deterministic
+x[i],p[i],deterministic
+"mean(w[])",p[i],deterministic
+p[i],d[i],stochastic
+x[i],x1[i],deterministic
+d[i],d1[i],deterministic
 
-x1_i,w_i,stochastic
-d1_i,w_i,stochastic
-phi_jk,w_i,stochastic
+x1[i],w[i],stochastic
+d1[i],w[i],stochastic
+phi[j,k],w[i],stochastic
 
-w_i,w_mean,deterministic
+w[i],"mean(w[])",deterministic
 beta0,beta0C,deterministic
 beta,beta0C,deterministic
-w_mean,beta0C,deterministic
+"mean(w[])",beta0C,deterministic
 beta0C,gamma1,deterministic
 beta,gamma1,deterministic
 q,gamma1,deterministic

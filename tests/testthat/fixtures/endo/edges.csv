@@ -1,7 +1,7 @@
 from,to,kind
-p_ij,Y_iJ,stochastic
-e_ij,p_ij,deterministic
-e_sum_i,p_ij,deterministic
-beta,e_ij,deterministic
-est_ij,e_ij,deterministic
-e_ij,e_sum_i,deterministic
+p[i,j],Y[i,1:J],stochastic
+e[i,j],p[i,j],deterministic
+sum(e[i,]),p[i,j],deterministic
+beta,e[i,j],deterministic
+est[i,j],e[i,j],deterministic
+e[i,j],sum(e[i,]),deterministic

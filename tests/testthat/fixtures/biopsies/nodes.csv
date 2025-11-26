@@ -1,13 +1,13 @@
-id,label,type,plates
-i,i,index,
-plate_i,"i plate",plate,
+label,type,plates
+i,index,
+"i plate",plate,
 
-true_i,"true[i]",stochastic,"for(i in 1:ns)"
-biopsies_ik,"biopsies[i,k]",stochastic,"for(i in 1:ns); for(k in 1:4)"
-nbiops_i,"nbiops[i]",deterministic,"for(i in 1:ns)"
+"true[i]",stochastic,"I"
+"biopsies[i,k]",stochastic,"I;K"
+"nbiops[i]",deterministic,"I"
 
-error_2,"error[2,1:2]",stochastic,
-error_3,"error[3,1:3]",stochastic,
-error_4,"error[4,1:4]",stochastic,
+"error[2,1:2]",stochastic,
+"error[3,1:3]",stochastic,
+"error[4,1:4]",stochastic,
 
-p,"p[1:4]",stochastic,
+"p[1:4]",stochastic,

@@ -1,6 +1,6 @@
 from,to,kind
-theta_i,Q_ijk,deterministic
-delta_j,Q_ijk,deterministic
-gamma_jk,Q_ijk,deterministic
-Q_ijk,p_ijk,deterministic
-p_ijk,grade_ij,stochastic
+theta[i],Q[i,j,k],deterministic
+delta[j],Q[i,j,k],deterministic
+gamma[j,k],Q[i,j,k],deterministic
+Q[i,j,k],p[i,j,k],deterministic
+p[i,j,k],grade[i,j],stochastic

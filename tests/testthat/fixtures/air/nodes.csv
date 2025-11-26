@@ -1,15 +1,15 @@
-id,label,type,plates
-j,j,index,
-plate_j,j plate,plate,
-y[j],"y[j]",stochastic,"for(j in 1:J)"
-p[j],"p[j]",deterministic,"for(j in 1:J)"
-X[j],"X[j]",stochastic,"for(j in 1:J)"
-mu[j],"mu[j]",deterministic,"for(j in 1:J)"
-n[j],"n[j]",deterministic,"for(j in 1:J)"
-Z[j],"Z[j]",deterministic,"for(j in 1:J)"
+label,type,plates
+j,index,
+j plate,plate,
+"y[j]",stochastic,"J"
+"p[j]",deterministic,"J"
+"X[j]",stochastic,"J"
+"mu[j]",deterministic,"J"
+"n[j]",deterministic,"J"
+"Z[j]",deterministic,"J"
 
-theta1,"theta[1]",stochastic,
-theta2,"theta[2]",stochastic,
-tau,tau,deterministic,
-alpha,alpha,deterministic,
-beta,beta,deterministic,
+"theta[1]",stochastic,
+"theta[2]",stochastic,
+tau,deterministic,
+alpha,deterministic,
+beta,deterministic,

@@ -1,14 +1,14 @@
-id,label,type,plates
-i,i,index,
-j,j,index,
-k,k,index,
-plate_i,"i plate",plate,
-plate_j,"j plate",plate,
-plate_k,"k plate",plate,
-theta_i,"theta[i]",stochastic,"for(i in 1:nChild)"
-delta_j,"delta[j]",deterministic,"for(j in 1:nInd)"
-gamma_jk,"gamma[j,k]",deterministic,"for(j in 1:nInd); for(k in 1:ncat-1)"
-Q_ijk,"Q[i,j,k]",deterministic,"for(i in 1:nChild); for(j in 1:nInd); for(k in 1:ncat-1)"
-p_ijk,"p[i,j,k]",deterministic,"for(i in 1:nChild); for(j in 1:nInd); for(k in 1:ncat)"
-grade_ij,"grade[i,j]",stochastic,"for(i in 1:nChild); for(j in 1:nInd)"
+label,type,plates
+i,index,
+j,index,
+k,index,
+"i plate",plate,
+"j plate",plate,
+"k plate",plate,
+"theta[i]",stochastic,"I"
+"delta[j]",deterministic,"J"
+"gamma[j,k]",deterministic,"J/K"
+"Q[i,j,k]",deterministic,"I/J/K"
+"p[i,j,k]",deterministic,"I/J/K"
+"grade[i,j]",stochastic,"I/J"
 
