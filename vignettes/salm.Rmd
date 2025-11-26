@@ -1,0 +1,354 @@
+---
+title: "salm"
+output:
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{rats}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+# --- chunk defaults ---
+knitr::opts_chunk$set(
+  collapse = TRUE, comment = "#>",
+  fig.width = 7, fig.height = 4.8,
+  message = FALSE, warning = FALSE
+)
+
+# --- libraries ---
+suppressPackageStartupMessages({
+  library(dplyr); library(tidyr); library(ggplot2); library(coda)
+  library(rjags); library(knitr)
+  library(readr)            # for read_csv()
+  library(here)             # for here::here()
+  library(dagnabit.docs)
+})
+
+# Knit as if we're at the repo root (so relative paths work in vignettes/)
+knitr::opts_knit$set(root.dir = here::here())
+
+# --- tiny helpers so files are found in both dev + installed pkg ---
+pkg_file <- function(...) {
+  p <- system.file(..., package = "dagnabit.docs")
+  if (nzchar(p)) return(p)
+  ""
+}
+
+find_fixture <- function(example, fname) {
+  # 1) prefer installed file
+  p <- pkg_file("extdata", "examples", example, fname)
+  if (nzchar(p) && file.exists(p)) return(p)
+
+  # 2) fall back to repo copies while developing
+  cands <- c(
+    here::here("inst",  "extdata", "examples",        example, fname),
+    here::here("tests", "testthat", "fixtures",        example, fname),
+    here::here("tests", "testthat", "parser-examples", example, fname)
+  )
+  hit <- cands[file.exists(cands)]
+  if (length(hit)) return(hit[1])
+
+  stop("Can't find file for example '", example, "': ", fname)
+}
+
+read_fixture <- function(example, fname) {
+  readr::read_csv(find_fixture(example, fname), show_col_types = FALSE)
+}
+
+set.seed(123)
+```
+
+---
+title: "Salm — Original BUGS Code, Official Diagram,  Package Recreation"
+author: "Naz Yucel"
+date: "`r format(Sys.Date())`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Salm — Original BUGS → Official Diagram → Package Recreation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Overview
+Salm (extra) is a random-effects Poisson dose–response model for a Salmonella mutagenicity assay (Breslow, 1984). At each quinoline dose (0–1000 μg/plate), three plates yield revertant colony counts. To handle over-dispersion, the mean uses a log link with a plate-level random effect:
+  y_ij ~ Poisson(mu_ij)
+  log(mu_ij) = alpha + (beta*log(x_i + 10)) + gamma(x_i) + lamdba_ij, 
+  lamdba_ij ~ Nornal(0,tau)
+We use diffuse normals for alpha, beta, gamma and compare two prior for variability: Uniform on SD (sigma ~ Unif(0,100), tau = 1/(sigma^2)) or Gamma on precision (tau ~ Gamma(0.001,0.001)). 
+
+
+## A) Original BUGS model
+
+> The Salm model (poisson variation in dose-response study) as presented in the WinBUGS help examples.
+
+```{r salm-bugs, results='asis'}
+paths <- c(
+  system.file("extdata/winbugs/salm_model.bug", package = "dagnabit.docs"),
+  "inst/extdata/winbugs/salm_model.bug",
+  "../inst/extdata/winbugs/salm_model.bug",
+  "../../inst/extdata/winbugs/salm_model.bug"
+)
+p <- paths[file.exists(paths)][1]
+
+emit_fenced <- function(txt) cat("```", txt, "```", sep = "\n")
+
+if (!length(p) || is.na(p)) {
+  emit_fenced(paste(
+    "model {",
+    "  for (i in 1:doses) {",
+    "    for (j in 1:plates) {",
+    "      y[i, j]  ~ dpois(mu[i, j])",
+    "      log(mu[i, j]) <- alpha + beta * log(x[i] + 10) + gamma * x[i] + lambda[i, j]",
+    "      lambda[i, j]  ~ dnorm(0.0, tau)",
+    "    }",
+    "  }",
+    "",
+    "  alpha ~ dnorm(0.0, 1.0E-6)",
+    "  beta  ~ dnorm(0.0, 1.0E-6)",
+    "  gamma ~ dnorm(0.0, 1.0E-6)",
+    "",
+    "  # Prior 1 (on SD):",
+    "  sigma ~ dunif(0, 100)",
+    "  tau   <- 1 / (sigma * sigma)",
+    "",
+    "  # Alternative Prior 2 (on precision):",
+    "  # tau   ~ dgamma(1.0E-3, 1.0E-3)",
+    "  # sigma <- 1 / sqrt(tau)   # s.d. of random effects",
+    "}",
+    sep = "\n"
+  ))
+} else {
+  emit_fenced(paste(readLines(p, warn = FALSE), collapse = "\n"))
+}
+```
+
+
+## B) Official WinBUGS diagram
+```{r salm-diagram, echo=FALSE, fig.cap="Official WinBUGS 'Rats' graphical model",out.width="80%", fig.align="center"}
+paths <- c(
+  # when the package is installed/built
+  system.file("extdata/winbugs/salm_diagram.png", package = "dagnabit.docs"),
+  # common dev-time locations
+  "inst/extdata/winbugs/salm_diagram.png",
+  "../inst/extdata/winbugs/salm_diagram.png",
+  "../../inst/extdata/winbugs/salm_diagram.png",
+  "vignettes/fig/salm_diagram.png",
+  "vignettes/salm_diagram.png"
+)
+
+img <- paths[file.exists(paths)][1]
+if (length(img) && !is.na(img)) {
+  knitr::include_graphics(img)
+} else {
+  cat("Diagram not found. Add `inst/extdata/winbugs/salm_diagram.png` and re-knit.\n")
+}
+```
+
+## C) Nodes and Edges
+```{r salm-fixtures, message=FALSE, warning=FALSE}
+# Load nodes/edges for the SALM example (works in dev and after install)
+salm_nodes <- read_fixture("salm", "nodes.csv")
+salm_edges <- read_fixture("salm", "edges.csv")
+
+# quick sanity
+list(n_nodes = nrow(salm_nodes), n_edges = nrow(salm_edges))
+
+# light validation (ids unique, edges reference existing nodes)
+stopifnot(
+  length(unique(salm_nodes$id)) == nrow(salm_nodes),
+  all(salm_edges$from %in% salm_nodes$id),
+  all(salm_edges$to   %in% salm_nodes$id)
+)
+
+# peek
+head(salm_nodes, 15)
+head(salm_edges, 8)
+```
+
+
+## D) BUGS Parser Function and Test
+```{r bugs}
+
+```
+
+
+## E) Package recreation (fit + outputs)
+
+### Data
+
+```{r salm-data}
+# doses vector (6 doses)
+x <- c(0, 10, 33, 100, 333, 1000)
+
+# counts as plates x doses (3 x 6) from the WinBUGS sheet:
+y_raw <- matrix(
+  c(15,16,16,27,33,20,
+    21,18,26,41,38,27,
+    29,21,33,69,41,42),
+  nrow = 3, byrow = TRUE
+)
+
+# Make y be doses x plates (6 x 3) so y[i, j] matches i=dose, j=plate
+y <- t(y_raw)
+
+I <- nrow(y)  # number of doses (should be 6)
+J <- ncol(y)  # number of plates (should be 3)
+
+# JAGS data list
+jags_data <- list(y = y, x = x, I = I, J = J)
+```
+
+
+### JAGS model (centered time)
+
+```{r salm-model}
+salm_model <- "
+model {
+  for (i in 1:I) {              # doses
+    for (j in 1:J) {            # plates
+      y[i, j] ~ dpois(mu[i, j])
+      log(mu[i, j]) <- alpha + beta * log(x[i] + 10) + gamma * x[i] + lambda[i, j]
+      lambda[i, j] ~ dnorm(0, tau)
+    }
+  }
+
+  # weakly-informative priors on fixed effects
+  alpha ~ dnorm(0.0, 1.0E-6)
+  beta  ~ dnorm(0.0, 1.0E-6)
+  gamma ~ dnorm(0.0, 1.0E-6)
+
+  # PRIOR 1 on random-effects SD:
+  sigma ~ dunif(0, 100)
+  tau   <- 1 / (sigma * sigma)
+
+  # PRIOR 2 alternative (comment PRIOR 1 out if you use this):
+  # tau   ~ dgamma(1.0E-3, 1.0E-3)
+  # sigma <- 1 / sqrt(tau)
+}
+"
+```
+
+### Fit & sample
+
+```{r salm-fit, results='hide', message=TRUE}
+make_inits <- function() list(
+  alpha = 0,
+  beta  = 0,
+  gamma = 0,
+  sigma = runif(1, 0.1, 5)   # harmless if using Prior 2
+)
+
+mod <- rjags::jags.model(
+  textConnection(salm_model),
+  data  = jags_data,
+  inits = list(make_inits(), make_inits(), make_inits()),
+  n.chains = 3,
+  n.adapt  = 1000
+)
+
+update(mod, 2000)  # burn-in
+
+samp <- rjags::coda.samples(
+  model = mod,
+  variable.names = c("alpha","beta","gamma","sigma","tau"),
+  n.iter = 10000,
+  thin   = 5
+)
+```
+
+```{r rats-summaries}
+# --- Posterior summaries (SALM) ---
+# (You named the chunk rats-summaries, so I'm keeping that name.)
+sum_out <- summary(samp)
+stats   <- sum_out$statistics
+quants  <- sum_out$quantiles
+
+# Start with whatever Mean/SD are present
+base <- data.frame(param = rownames(stats), check.names = FALSE)
+if (!is.null(stats)) {
+  if ("Mean" %in% colnames(stats)) base$Mean <- stats[, "Mean"]
+  if ("SD"   %in% colnames(stats)) base$SD   <- stats[, "SD"]
+}
+
+# Add quantiles (and rename 50% -> Median)
+if (!is.null(quants)) {
+  qdf <- data.frame(
+    param  = rownames(quants),
+    `2.5%` = quants[, "2.5%"],
+    Median = quants[, "50%"],
+    `97.5%`= quants[, "97.5%"],
+    check.names = FALSE
+  )
+  sumtab <- merge(base, qdf, by = "param", all = TRUE, sort = FALSE)
+} else {
+  sumtab <- base
+}
+
+# Show the key population params for SALM
+wanted <- intersect(c("alpha","beta","gamma","sigma","tau"), sumtab$param)
+cols   <- intersect(c("Mean","SD","2.5%","Median","97.5%"), colnames(sumtab))
+
+knitr::kable(
+  round(sumtab[match(wanted, sumtab$param), cols, drop = FALSE], 4),
+  caption = "Posterior summaries for SALM fixed effects and random-effect scale."
+)
+```
+
+### Diagnostics
+
+```{r salm-diagnostics}
+# Gelman-Rubin on core params:
+keep <- intersect(c("alpha","beta","gamma","sigma","tau"), colnames(samp[[1]]))
+if (length(keep)) {
+  print(coda::gelman.diag(samp[, keep]))
+}
+
+# Quick trace and ACF plots (comment out if you prefer cleaner HTML)
+if (length(keep)) {
+  coda::traceplot(samp[, keep])
+  coda::autocorr.plot(samp[, keep])
+}
+```
+
+### Fitted lines vs data
+
+```{r salm-fitted, fig.cap="Posterior-mean fitted lines per rat (overlayed on data)", eval=requireNamespace("rjags", quietly = TRUE)}
+# --- Posterior-mean fitted curve vs observed plate means ---
+
+# Posterior means of fixed effects
+m <- tryCatch(do.call(rbind, samp), error = function(e) NULL)
+stopifnot(!is.null(m))
+am <- mean(m[, "alpha"])
+bm <- mean(m[, "beta"])
+gm <- mean(m[, "gamma"])
+
+# Expected mean (averaging over lambda_ij ~ N(0, tau), which has mean 0)
+mu_hat <- exp(am + bm * log(x + 10) + gm * x)
+
+# Observed mean count across plates at each dose
+y_bar  <- rowMeans(y)  # y is I x J (doses x plates)
+
+plot_df <- data.frame(
+  dose = x,
+  observed = y_bar,
+  fitted   = mu_hat
+)
+
+ggplot2::ggplot(plot_df, ggplot2::aes(dose, observed)) +
+  ggplot2::geom_point(size = 2) +
+  ggplot2::geom_line(ggplot2::aes(y = fitted)) +
+  ggplot2::labs(
+    x = "Dose of quinoline (µg per plate)",
+    y = "Revertant colonies (mean across plates)",
+    title = "SALM: posterior-mean fitted curve vs. observed means"
+  )
+```
+
+
+
+
+

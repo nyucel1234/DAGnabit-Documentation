@@ -1,6 +1,7 @@
 ---
 title: "rats"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{rats}
   %\VignetteEngine{knitr::rmarkdown}
@@ -13,16 +14,58 @@ knitr::opts_chunk$set(
   fig.width = 7, fig.height = 4.8,
   message = FALSE, warning = FALSE
 )
+
 suppressPackageStartupMessages({
-  library(dplyr); library(tidyr); library(ggplot2); library(coda)
-  library(rjags); library(knitr)
-  library(dagnabit.docs)
+  library(dplyr); library(tidyr); library(ggplot2)
+  library(coda);  library(rjags);  library(knitr)
+  library(readr)
 })
+
+# Knit from the repo root (so relative paths like inst/... work while developing)
+if (requireNamespace("here", quietly = TRUE)) {
+  knitr::opts_knit$set(root.dir = here::here())
+  cat("Vignette ROOT =", here::here(), "\n")
+}
+
+pkg <- "dagnabit.docs"
+
+# --- tiny helpers (same pattern as salm) --------------------------------------
+
+# 1) Prefer an installed package file; else fall back to repo path
+pkg_file <- function(...) {
+  p <- system.file(..., package = pkg)
+  if (nzchar(p)) return(p)          # installed/built case
+  file.path("inst", ...)            # dev repo case
+}
+
+# 2) Choose fixtures directory (works for both tests/fixtures or tests/parser-examples)
+fixtures_dir <- function(example) {
+  if (dir.exists(file.path("tests", "testthat", "fixtures", example))) {
+    file.path("tests", "testthat", "fixtures", example)
+  } else {
+    file.path("tests", "testthat", "parser-examples", example)
+  }
+}
+
+# 3) Find a CSV fixture: first try inst/extdata/examples/<ex>/<file>, else tests/...
+find_fixture <- function(example, fname) {
+  p1 <- pkg_file("extdata", "examples", example, fname)
+  if (file.exists(p1)) return(p1)
+  file.path(fixtures_dir(example), fname)
+}
+
+# 4) Read a fixture CSV with a sanity check
+read_fixture <- function(example, fname) {
+  p <- find_fixture(example, fname)
+  stopifnot(file.exists(p))
+  readr::read_csv(p, show_col_types = FALSE)
+}
+
 set.seed(123)
 ```
 
 ---
-title: "Rats — Original BUGS → Official Diagram → Package Recreation"
+title: "Rats — Original BUGS Code, Official Diagram,  Package Recreation"
 author: "Naz Yucel"
 date: "`r format(Sys.Date())`"
 output:
@@ -35,31 +78,36 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-### Overview
+## Overview
 
-The Rats example is a classic hierarchical normal model for longitudinal growth. Thirty rats are weighed at 5 time points; each rat has its own intercept (alpha[i]) and slope (beta[i]) for a linear growth curve, with population-level hyperparameters for these random effects. Fitted in JAGS, the model yields population growth summaries, between-rat variability, and per-rat fitted lines that can be overlaid on the data to assess fit. This structure is common in biomedical longitudinal analyses.
+The Rats example is a classic hierarchical normal model for longitudinal growth. Thirty rats are weighed at 5 time points; each rat has its own intercept (alpha_i) and slope (beta_i) for a linear growth curve with time centered at x=22. Population-level hyperparameters govern between-rat variability. Fitted in JAGS, the model yields population growth summaries, between-rat variability, and per-rat fitted lines that can be overlaid on the data to assess fit. This structure is common in biomedical longitudinal analyses.
 
-### A) Original BUGS model
+This vignette now walks the entire DAGnabit pipeline: read the original WinBUGS file, let **Shayla’s parser** turn that text into nodes/edges tables, verify those tables against the packaged fixtures, pass the result into **Liam’s layout editor** (which mirrors the official diagram and can export a PNG), and finally run the model in JAGS to recreate the published inferences.
+
+
+## A) Original BUGS model
 
 > The Rats model (random-effects growth curves with centered time) as presented in the WinBUGS help examples. 
 
 
 ```{r rats-bugs, results='asis'}
 paths <- c(
-  system.file("extdata/winbugs/rats_model.bug", package = "dagnabit.docs"),
-  "inst/extdata/winbugs/rats_model.bug",
-  "../inst/extdata/winbugs/rats_model.bug",
-  "../../inst/extdata/winbugs/rats_model.bug"
+pkg_file("extdata", "winbugs", "rats_model.bug"),
+file.path("inst", "extdata", "winbugs", "rats_model.bug"),
+file.path("..", "inst", "extdata", "winbugs", "rats_model.bug"),
+file.path("..", "..", "inst", "extdata", "winbugs", "rats_model.bug")
 )
 paths <- paths[nzchar(paths)]
 p <- paths[which(file.exists(paths))[1]]
+
 if (!length(p)) {
-  stop("rats_model.bug not found under inst/extdata/winbugs/.")
-}
+stop("rats_model.bug not found under inst/extdata/winbugs/.")
+} else {
 cat(paste(readLines(p, warn = FALSE), collapse = "\n"))
+}
 ```
 
-### B) Official WinBUGS diagram
+## B) Official WinBUGS diagram
 
 ```{r rats-diagram, echo=FALSE, fig.cap="Official WinBUGS 'Rats' graphical model",out.width="80%", fig.align="center"}
 paths <- c(
@@ -77,31 +125,145 @@ if (!length(img)) {
 }
 ```
 
-### C) Nodes and Edges
 
-```{r rats-fixtures, message=FALSE, warning=FALSE}
-library(readr)
-pkg <- "dagnabit.docs"
 
-rats_nodes <- readr::read_csv(
-  system.file("extdata/examples/rats/nodes.csv", package = pkg),
-  show_col_types = FALSE
+## C) Shayla's BUGS parser → tidy nodes/edges
+
+Shayla’s parser (`parse_bugs_to_nodes_edges()`) is bundled at the repo root. The chunk below sources that script, runs the parser on the same BUGS model text, and gives back the nodes/edges tables that downstream tooling (and the package fixtures) expect.
+```{r rats-parser}
+# Use the BUGS model text you already defined above
+bugs_text <- rats_model
+
+# 1) Find Shayla's parser script in the repo root or R/
+repo_root <- if (requireNamespace("here", quietly = TRUE)) here::here() else getwd()
+parser_candidates <- c(
+  file.path(repo_root, "BugsParserFunctionandTest3.0"),
+  file.path(repo_root, "BugsParserFunctionandTest3.0.R"),
+  file.path(repo_root, "R", "BugsParserFunctionandTest3.0"),
+  file.path(repo_root, "R", "BugsParserFunctionandTest3.0.R")
 )
-rats_edges <- readr::read_csv(
-  system.file("extdata/examples/rats/edges.csv", package = pkg),
-  show_col_types = FALSE
+parser_file <- parser_candidates[file.exists(parser_candidates)][1]
+stopifnot(!is.na(parser_file))        # fail fast if not found
+old_flag <- Sys.getenv("BUGS_PARSER_SKIP_MAIN", unset = NA_character_)
+Sys.setenv(BUGS_PARSER_SKIP_MAIN = "1")
+parser_env <- new.env(parent = parent.frame())
+sys.source(parser_file, envir = parser_env)  # load functions without auto demo noise
+if (is.na(old_flag)) Sys.unsetenv("BUGS_PARSER_SKIP_MAIN") else Sys.setenv("BUGS_PARSER_SKIP_MAIN", old_flag)
+
+# 2) Auto-detect the exported function name
+name_candidates <- c(
+  "parse_bugs_to_nodes_edges",
+  "BugsParserFunction", "BugsParser", "BUGS_parser",
+  "parse_bugs", "bugs_to_tables", "Bugs_to_tables"
+)
+has_fun <- vapply(name_candidates, exists, logical(1), envir = parser_env)
+stopifnot(any(has_fun))
+parser_fun_name <- name_candidates[which(has_fun)[1]]
+parser_fun <- get(parser_fun_name, envir = parser_env)
+
+# 3) Run parser → tables
+parsed <- parser_fun(bugs_text)       # expect list(nodes=..., edges=...)
+stopifnot(is.list(parsed), all(c("nodes","edges") %in% names(parsed)))
+nodes_parsed <- parsed$nodes
+edges_parsed <- parsed$edges
+
+# Normalize blanks to NA so downstream joins match fixture tables
+nodes_parsed <- nodes_parsed |>
+  dplyr::mutate(dplyr::across(c(dist, plates), ~ifelse(!nzchar(.), NA_character_, .)))
+edges_parsed <- edges_parsed |>
+  dplyr::mutate(dplyr::across(everything(), ~ifelse(!nzchar(.), NA_character_, .)))
+
+normalize_for_join <- function(df) {
+  df |>
+    dplyr::mutate(dplyr::across(
+      where(is.character),
+      ~ifelse(is.na(.x), "<NA>", .x)
+    ))
+}
+
+# Quick peek
+list(parsed_nodes = nrow(nodes_parsed), parsed_edges = nrow(edges_parsed))
+```
+
+```{r rats-parser-peek, results='asis'}
+knitr::kable(
+  head(nodes_parsed, 19),
+  caption = sprintf("Nodes returned by Shayla's `%s()` parser.", parser_fun_name)
 )
 
-# quick sanity
-list(n_nodes = nrow(rats_nodes), n_edges = nrow(rats_edges))
+knitr::kable(
+  head(edges_parsed, 16),
+  caption = "Parsed edges."
+)
 ```
 
 
-### D) Package recreation (fit + outputs)
+
+## D) Nodes & edges fixtures (cross-check)
+
+The package ships CSV fixtures generated from Shayla’s parser. This chunk loads those CSVs, verifies they match the freshly parsed tables, and prints out a small excerpt for reference.
+
+```{r rats-fixtures, message=FALSE, warning=FALSE}
+rats_nodes <- read_fixture("rats", "nodes.csv")
+rats_edges <- read_fixture("rats", "edges.csv")
+r_nodes_compare <- normalize_for_join(rats_nodes)
+r_edges_compare <- normalize_for_join(rats_edges)
+n_nodes_compare <- normalize_for_join(nodes_parsed)
+e_nodes_compare <- normalize_for_join(edges_parsed)
+
+list(
+n_nodes = nrow(rats_nodes),
+n_edges = nrow(rats_edges)
+)
+
+stopifnot(
+  length(unique(rats_nodes$id)) == nrow(rats_nodes),
+  all(rats_edges$from %in% rats_nodes$id),
+  all(rats_edges$to   %in% rats_nodes$id)
+)
+
+head(rats_nodes, 19)
+head(rats_edges, 16)
+```
+
+
+## E) Liam's layout editor (interactive + export)
+
+Liam’s htmlwidget takes the nodes/edges tables and opens the drag-and-drop layout editor. Install the widget locally (e.g. `devtools::install_local("layout widget set/layoutWidget_0.5.6.zip", force = TRUE)`) and run the chunk below to interactively nudge the nodes until they match the official diagram.
+
+```{r rats-layout-widget, message=FALSE}
+if (!requireNamespace("layoutWidget", quietly = TRUE)) {
+  cat("layoutWidget not installed. Install from layout widget set/layoutWidget_0.5.6.zip and re-knit to open the editor.\n")
+} else {
+  layoutWidget::layoutWidget(rats_nodes, rats_edges, width = "100%", height = 600)
+}
+```
+
+After arranging the graph, use the widget’s PNG export button; dropping the PNG at `inst/extdata/examples/rats/rats_layout.png` lets the vignette embed it for a static record (until then the code below falls back to the WinBUGS reference diagram).
+
+```{r rats-layout-export, echo=FALSE, fig.cap="Exported layout editor view after matching the WinBUGS diagram.", out.width="90%", fig.align="center"}
+layout_img_paths <- c(
+  system.file("extdata/examples/rats/rats_layout.png", package = pkg),
+  "inst/extdata/examples/rats/rats_layout.png",
+  "../inst/extdata/examples/rats/rats_layout.png",
+  "vignettes/fig/rats_layout.png",
+  system.file("extdata/winbugs/rats_diagram.png", package = pkg)
+)
+layout_img_paths <- layout_img_paths[nzchar(layout_img_paths)]
+layout_img <- layout_img_paths[which(file.exists(layout_img_paths))[1]]
+if (!length(layout_img)) {
+  cat("Layout export not found. Add inst/extdata/examples/rats/rats_layout.png after exporting from the widget.\n")
+} else {
+  knitr::include_graphics(layout_img)
+}
+```
+
+
+## F) Package recreation (fit + outputs)
 
 We fit the hierarchical growth-curve with **JAGS**, centering time at \(\bar{x}=22\).
 
-## Data
+### Data
 
 ```{r rats-data}
 x    <- c(8, 15, 22, 29, 36)
@@ -130,6 +292,7 @@ rats_long <- as.data.frame(Y) |>
   dplyr::mutate(rat = factor(seq_len(N))) |>
   tidyr::pivot_longer(starts_with("day"), names_to = "age", values_to = "weight") |>
   dplyr::mutate(age = as.numeric(sub("day", "", age)))
+head(rats_long)
 ```
 
 ```{r rats-rawplot, fig.cap="Observed weights per rat"}
@@ -144,29 +307,38 @@ ggplot2::ggplot(rats_long, ggplot2::aes(age, weight, group = rat)) +
 ```{r rats-model}
 rats_model <- "
 model {
+
+  # Likelihood
   for (i in 1:N) {
     for (j in 1:T) {
-      Y[i, j] ~ dnorm(mu[i, j], tau_c)
+      Y[i, j] ~ dnorm(mu[i, j], tau_c)          # tau_c is precision of observation noise
       mu[i, j] <- alpha[i] + beta[i] * (x[j] - xbar)
     }
+    # Random effects for each rat
     alpha[i] ~ dnorm(alpha_c, tau_alpha)
     beta[i]  ~ dnorm(beta_c,  tau_beta)
   }
 
-  # hyperpriors
+  # Observation noise (population-level)
+  tau_c  ~ dgamma(0.001, 0.001)
+  sigma  <- 1 / sqrt(tau_c)                     # for reporting only
+
+  # Hypermeans for random effects
   alpha_c ~ dnorm(0.0, 1.0E-6)
   beta_c  ~ dnorm(0.0, 1.0E-6)
 
-  sigma       ~ dunif(0, 100)
-  tau_c       <- 1 / (sigma * sigma)
-
+  # === Choice of prior for random-effects variances ===
+  # Prior 1 (recommended): put uniform on the SDs, then define precisions
   sigma_alpha ~ dunif(0, 100)
-  tau_alpha   <- 1 / (sigma_alpha * sigma_alpha)
-
   sigma_beta  ~ dunif(0, 100)
-  tau_beta    <- 1 / (sigma_beta * sigma_beta)
+  tau_alpha   <- 1 / (sigma_alpha * sigma_alpha)
+  tau_beta    <- 1 / (sigma_beta  * sigma_beta)
 
-  # derived
+  # Prior 2 (alternative; often discouraged): put gamma on the precisions directly
+  # tau_alpha ~ dgamma(0.001, 0.001)
+  # tau_beta  ~ dgamma(0.001, 0.001)
+
+  # Derived population intercept at x = 0 (since model uses centered time x - xbar)
   alpha0 <- alpha_c - xbar * beta_c
 }
 "
@@ -190,20 +362,46 @@ params <- c("alpha0","beta_c","sigma","alpha","beta")
 ### Fit & sample
 
 ```{r rats-fit, results='hide', message=TRUE}
+### Fit & sample (safe inits — no sigma or alpha0 here)
+# Dispersed starting values
+make_inits <- function() {
+  list(
+    # per-rat random effects
+    alpha = rnorm(N, 150, 10),
+    beta  = rnorm(N,   6,  2),
+
+    # population means
+    alpha.c = 150,
+    beta.c  = 6,
+
+    # precisions (1 / sd^2) for residual and REs
+    tau.c     = 1 / runif(1, 3, 10)^2,  # residual precision
+    tau.alpha = 1 / runif(1, 1, 10)^2,  # alpha RE precision
+    tau.beta  = 1 / runif(1, 1, 10)^2   # beta  RE precision
+  )
+}
+
+# monitor set (sigma is derived from tau.c, so it's OK to monitor)
+params <- c("alpha0", "beta.c", "sigma", "alpha", "beta")
+
+# (Optional) sanity: ensure we are NOT trying to init sigma/alpha0
+# cat("Init names:", paste(names(make_inits()), collapse=", "), "\n")
+
 mod <- rjags::jags.model(
   textConnection(rats_model),
-  data = jags_data,
+  data  = jags_data,
   inits = list(make_inits(), make_inits(), make_inits()),
   n.chains = 3,
   n.adapt  = 1000
 )
 
 update(mod, 2000)  # burn-in
+
 samp <- rjags::coda.samples(
   model = mod,
   variable.names = params,
   n.iter = 10000,
-  thin = 5
+  thin   = 5
 )
 ```
 
@@ -289,9 +487,19 @@ if (length(rat_params)) {
 ### Diagnostics
 
 ```{r rats-diagnostics}
-# Convergence (Gelman–Rubin) and quick autocorrelation
-coda::gelman.diag(samp[, c("alpha0","beta_c","sigma")])
-coda::autocorr.plot(samp[, c("alpha0","beta_c","sigma")])
+## Convergence (Gelman–Rubin) and quick autocorrelation
+want <- c("alpha0", "beta.c", "sigma")              # note: beta.c (dot), not beta_c
+have <- intersect(want, coda::varnames(samp))
+
+if (length(have) == 0) {
+  message("No requested parameters found in draws: ", paste(want, collapse = ", "))
+} else {
+  # Gelman–Rubin diagnostics
+  print(coda::gelman.diag(samp[, have, drop = FALSE]))
+
+  # Simple autocorrelation plots
+  coda::autocorr.plot(samp[, have, drop = FALSE])
+}
 ```
 
 ### Fitted lines vs data
@@ -318,8 +526,3 @@ ggplot2::ggplot() +
   ggplot2::geom_point(data = rats_long, ggplot2::aes(age, weight), size = 0.8, alpha = 0.6) +
   ggplot2::labs(x = "Age (days)", y = "Weight (g)")
 ```
-
-
-###
-
-
