@@ -1,10 +1,10 @@
 from,to,kind
 asia,tuberculosis,stochastic
-smoking,lung_cancer,stochastic
+smoking,"lung.cancer",stochastic
 smoking,bronchitis,stochastic
 
 tuberculosis,either,deterministic
-lung_cancer,either,deterministic
+"lung.cancer",either,deterministic
 
 either,xray,stochastic
 either,dyspnoea,stochastic

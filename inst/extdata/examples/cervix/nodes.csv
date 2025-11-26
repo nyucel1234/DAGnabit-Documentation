@@ -1,26 +1,26 @@
-id,label,type,plates
-i,i,index,
-j,j,index,
-k,k,index,
-plate_i,"i plate",plate,
-plate_j,"j plate",plate,
-plate_k,"k plate",plate,
+label,type,plates
+i,index,
+j,index,
+k,index,
+"i plate",plate,
+"j plate",plate,
+"k plate",plate,
 
-x_i,"x[i]",stochastic,"for(i in 1:N)"
-p_i,"p[i]",deterministic,"for(i in 1:N)"
-d_i,"d[i]",stochastic,"for(i in 1:N)"
-w_i,"w[i]",stochastic,"for(i in 1:N)"
-x1_i,"x1[i]",deterministic,"for(i in 1:N)"
-d1_i,"d1[i]",deterministic,"for(i in 1:N)"
+"x[i]",stochastic,"I"
+"p[i]",deterministic,"I"
+"d[i]",stochastic,"I"
+"w[i]",stochastic,"I"
+"x1[i]",deterministic,"I"
+"d1[i]",deterministic,"I"
 
-q,q,stochastic,
-beta0,beta0,stochastic,
-beta,beta,stochastic,
+q,stochastic,
+beta0,stochastic,
+beta,stochastic,
 
-w_mean,"mean(w[])",deterministic,
+"mean(w[])",deterministic,
 
-phi_jk,"phi[j,k]",stochastic,"for(j in 1:2); for(k in 1:2)"
+"phi[j,k]",stochastic,"J/K"
 
-beta0C,beta0C,deterministic,
-gamma1,gamma1,deterministic,
-gamma2,gamma2,deterministic,
+beta0C,deterministic,
+gamma1,deterministic,
+gamma2,deterministic,

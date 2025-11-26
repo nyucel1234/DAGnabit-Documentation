@@ -1,14 +1,14 @@
-id,label,type,plates
-i,i,index,
-plate_i,"i plate",plate,
+label,type,plates
+i,index,
+"i plate",plate,
 
-r_i,"r[i]",stochastic,"for(i in 1:N)"
-p_i,"p[i]",deterministic,"for(i in 1:N)"
-rhat_i,"rhat[i]",deterministic,"for(i in 1:N)"
+"r[i]",stochastic,"I"
+"p[i]",deterministic,"I"
+"rhat[i]",deterministic,"I"
 
-n_i,"n[i]",deterministic,"for(i in 1:N)"
-x_i,"x[i]",deterministic,"for(i in 1:N)"
+"n[i]",deterministic,"I"
+"x[i]",deterministic,"I"
 
-alpha_star,alpha.star,stochastic,
-beta,beta,stochastic,
-alpha,alpha,deterministic,
+alpha.star,stochastic,
+beta,stochastic,
+alpha,deterministic,

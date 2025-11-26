@@ -1,9 +1,9 @@
 from,to,kind
-theta,mu_i,stochastic
-tau_btw,mu_i,stochastic
-mu_i,y_ij,stochastic
-tau_with,y_ij,stochastic
-tau_with,sigma2_with,deterministic
-ICC,sigma2_btw,deterministic
-sigma2_with,sigma2_btw,deterministic
-sigma2_btw,tau_btw,deterministic
+theta,mu[i],stochastic
+tau.btw,mu[i],stochastic
+mu[i],y[i,j],stochastic
+tau.with,y[i,j],stochastic
+tau.with,sigma2.with,deterministic
+ICC,sigma2.btw,deterministic
+sigma2.with,sigma2.btw,deterministic
+sigma2.btw,tau.btw,deterministic

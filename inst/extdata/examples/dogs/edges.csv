@@ -1,10 +1,10 @@
 from,to,kind
-Y_ij,xa_ij,deterministic
-xa_ij,xs_ij,deterministic
-alpha,p_ij,deterministic
-beta,p_ij,deterministic
-xa_ij,p_ij,deterministic
-xs_ij,p_ij,deterministic
-p_ij,y_ij,stochastic
+Y[i,j],xa[i,j],deterministic
+xa[i,j],xs[i,j],deterministic
+alpha,p[i,j],deterministic
+beta,p[i,j],deterministic
+xa[i,j],p[i,j],deterministic
+xs[i,j],p[i,j],deterministic
+p[i,j],y[i,j],stochastic
 alpha,A,deterministic
 beta,B,deterministic

@@ -1,20 +1,20 @@
-id,label,type,plates
-i,i,index,
-j,j,index,
-k,k,index,
-plate_i,"i plate",plate,
-plate_j,"j plate",plate,
-plate_k,"k plate",plate,
+label,type,plates
+i,index,
+j,index,
+k,index,
+"i plate",plate,
+"j plate",plate,
+"k plate",plate,
 
-X_ijk,"X[i,j,k]",stochastic,"for(i in 1:I); for(j in 1:J); for(k in 1:K)"
-mu_ijk,"mu[i,j,k]",deterministic,"for(i in 1:I); for(j in 1:J); for(k in 1:K)"
+"X[i,j,k]",stochastic,"I;J;K"
+"mu[i,j,k]",deterministic,"I;J;K"
 
-lambda_ij,"lambda[i,j]",stochastic,"for(i in 1:I); for(j in 1:J)"
-alpha_k,"alpha[k]",stochastic,"for(k in 1:K)"
-beta_ik,"beta[i,k]",stochastic,"for(i in 1:I); for(k in 1:K) "
-gamma_jk,"gamma[j,k]",stochastic,"for(j in 1:J); for(k in 1:K)"
+"lambda[i,j]",stochastic,"I;J"
+"alpha[k]",stochastic,"K"
+"beta[i,k]",stochastic,"I;K"
+"gamma[j,k]",stochastic,"J;K"
 
-b_ik,"b[i,k]",deterministic,"for(i in 1:I); for(k in 1:K)"
-g_jk,"g[j,k]",deterministic,"for(j in 1:J); for(k in 1:K)"
-mean_beta_k,"mean(beta[k])",deterministic,"for(k in 1:K)"
-mean_gamma_k,"mean(gamma[k])",deterministic,"for(k in 1:K)"
+"b[i,k]",deterministic,"I;K"
+"g[j,k]",deterministic,"J;K"
+"mean(beta[k])",deterministic,"K"
+"mean(gamma[k])",deterministic,"K"

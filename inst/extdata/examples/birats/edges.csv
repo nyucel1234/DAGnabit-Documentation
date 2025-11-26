@@ -1,11 +1,11 @@
 from,to,kind
-mu_ij,Y_ij,stochastic
-tauC,Y_ij,stochastic
-beta_i2,mu_ij,deterministic
-x_j,mu_ij,deterministic
-mu_beta_i2,beta_i2,stochastic
-R_2x2,beta_i2,stochastic
-mean,mu_beta_i2,stochastic
-prec,mu_beta_i2,stochastic
-Omega,R_2x2,stochastic
+mu[i,j],Y[i,j],stochastic
+tauC,Y[i,j],stochastic
+beta[i,1:2],mu[i,j],deterministic
+x[j],mu[i,j],deterministic
+mu.beta[1:2],beta[i,1:2],stochastic
+R[1:2,1:2],beta[i,1:2],stochastic
+mean[],mu.beta[1:2],stochastic
+prec[ , ],mu.beta[1:2],stochastic
+Omega[ , ],R[1:2,1:2],stochastic
 tauC,sigma,deterministic

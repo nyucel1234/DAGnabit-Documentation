@@ -1,16 +1,16 @@
-id,label,type,plates
-i,i,index,
-j,j,index,
-plate_i,"i plate",plate,
-plate_j,"j plate",plate,
-beta_i2,"beta[i,1:2]",stochastic,"for(i in 1:N)"
-Y_ij,"Y[i,j]",stochastic,"for(i in 1:N); for(j in 1:T)"
-mu_ij,"mu[i,j]",deterministic,"for(i in 1:N); for(j in 1:T)"
-x_j,"x[j]",deterministic,"for(j in 1:T)"
-mu_beta_i2,"mu.beta[1:2]",stochastic,
-R_2x2,"R[1:2,1:2]",stochastic,
-tauC,tauC,stochastic,
-sigma,sigma,deterministic,
-Omega,"Omega[ , ]",deterministic,
-mean,"mean[]",deterministic,
-prec,"prec[ , ]",deterministic,
+label,type,plates
+i,index,
+j,index,
+"i plate",plate,
+"j plate",plate,
+"beta[i,1:2]",stochastic,"I"
+"Y[i,j]",stochastic,"I/J"
+"mu[i,j]",deterministic,"I/J"
+"x[j]",deterministic,"J"
+"mu.beta[1:2]",stochastic,
+"R[1:2,1:2]",stochastic,
+tauC,stochastic,
+sigma,deterministic,
+"Omega[ , ]",deterministic,
+"mean[]",deterministic,
+"prec[ , ]",deterministic,

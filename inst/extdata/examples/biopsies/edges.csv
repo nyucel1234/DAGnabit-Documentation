@@ -1,8 +1,8 @@
 from,to,kind
-biopsies_ik,nbiops_i,deterministic
-p,true_i,stochastic
-true_i,biopsies_ik,stochastic
-nbiops_i,biopsies_ik,stochastic
-error_2,biopsies_ik,stochastic
-error_3,biopsies_ik,stochastic
-error_4,biopsies_ik,stochastic
+biopsies[i,k],nbiops[i],deterministic
+p[1:4],true[i],stochastic
+true[i],biopsies[i,k],stochastic
+nbiops[i],biopsies[i,k],stochastic
+error[2,1:2],biopsies[i,k],stochastic
+error[3,1:3],biopsies[i,k],stochastic
+error[4,1:4],biopsies[i,k],stochastic

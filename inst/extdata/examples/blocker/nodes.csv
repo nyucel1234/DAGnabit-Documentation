@@ -1,16 +1,16 @@
-id,label,type,plates
-i,i,index,
-plate_i,i plate,plate,
+label,type,plates
+i,index,
+i plate,plate,
 
-mu_i,mu[i],stochastic,for(i in 1:Num)
-pc_i,pc[i],deterministic,for(i in 1:Num)
-pt_i,pt[i],deterministic,for(i in 1:Num)
-delta_i,delta[i],stochastic,for(i in 1:Num)
-rc_i,rc[i],stochastic,for(i in 1:Num)
-rt_i,rt[i],stochastic,for(i in 1:Num)
-nc_i,nc[i],deterministic,for(i in 1:Num)
-nt_i,nt[i],deterministic,for(i in 1:Num)
-d,d,stochastic,
-tau,tau,deterministic,
-sigma,sigma,stochastic,
-delta_new,delta.new,stochastic,
+mu[i],stochastic,"I"
+pc[i],deterministic,"I"
+pt[i],deterministic,"I"
+delta[i],stochastic,"I"
+rc[i],stochastic,"I"
+rt[i],stochastic,"I"
+nc[i],deterministic,"I"
+nt[i],deterministic,"I"
+d,stochastic,
+tau,deterministic,
+sigma,stochastic,
+delta.new,stochastic,
