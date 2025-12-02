@@ -1,15 +1,15 @@
-"id","label","type","plates"
-"i","i","index",
-"j","j","index",
-"plate_i","i plate","plate",
-"plate_j","j plate","plate",
-"y[i,j]","y[i,j]","stochastic",for(i in 1:doses); for(j in 1:plates)
-"mu[i,j]","mu[i,j]","deterministic",for(i in 1:doses); for(j in 1:plates)
-"lambda[i,j]","lambda[i,j]","stochastic",for(i in 1:doses); for(j in 1:plates) 
-"alpha","alpha","stochastic",
-"beta","beta","stochastic",
-"gamma","gamma","stochastic",
-"sigma","sigma","stochastic",
-"tau","tau","deterministic",
-"x[i]","x[i]","deterministic",for(i in 1:doses)
+"label","type","plates"
+"i","index",
+"j","index",
+"i plate","plate",
+"j plate","plate",
+"y[i,j]","data","I/J"
+"mu[i,j]","fitted parameter","I/J"
+"lambda[i,j]","fitted parameter","I/J" 
+"alpha","fitted parameter",
+"beta","fitted parameter",
+"gamma","fitted parameter",
+"sigma","fitted parameter",
+"tau","fitted parameter",
+"x[i]","data","I"
 
