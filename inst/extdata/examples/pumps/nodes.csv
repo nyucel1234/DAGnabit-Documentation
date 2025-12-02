@@ -1,9 +1,9 @@
 label,type,plates
 "i plate",plate,
 i,index,
-t[i],data,i
-theta[i],"fitted parameter",i
-lambda[i],"fitted parameter",i
-x[i],data,i
+t[i],data,I
+theta[i],"fitted parameter",I
+lambda[i],"fitted parameter",I
+x[i],data,I
 alpha,"fitted parameter",
 beta,"fitted parameter",
