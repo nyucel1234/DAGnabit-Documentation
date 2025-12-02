@@ -1,6 +1,6 @@
 from,to,kind
-alpha,theta_i,stochastic
-beta,theta_i,stochastic
-theta_i,lambda_i,deterministic
-t_i,lambda_i,deterministic
-lambda_i,x_i,stochastic
+alpha,theta[i],stochastic
+beta,theta[i],stochastic
+theta[i],lambda[i],deterministic
+t[i],lambda[i],deterministic
+lambda[i],x[i],stochastic
