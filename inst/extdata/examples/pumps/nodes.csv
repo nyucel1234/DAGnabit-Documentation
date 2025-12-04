@@ -7,3 +7,4 @@ lambda[i],"fitted parameter",I
 x[i],data,I
 alpha,"fitted parameter",
 beta,"fitted parameter",
+"N", "constant",
