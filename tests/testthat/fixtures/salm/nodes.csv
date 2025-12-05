@@ -12,3 +12,5 @@ gamma,"fitted parameter",
 sigma,"fitted parameter",
 tau,"fitted parameter",
 "x[i]",data,"I"
+"doses",constant,
+"plates",constant,
