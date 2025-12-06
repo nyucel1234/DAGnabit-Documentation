@@ -1,0 +1,176 @@
+---
+title: "salm package recreation"
+output: html_document
+---
+
+## Package recreation (fit + outputs)
+
+### Data
+
+```{r salm-data}
+# doses vector (6 doses)
+x <- c(0, 10, 33, 100, 333, 1000)
+
+# counts as plates x doses (3 x 6) from the WinBUGS sheet:
+y_raw <- matrix(
+  c(15,16,16,27,33,20,
+    21,18,26,41,38,27,
+    29,21,33,69,41,42),
+  nrow = 3, byrow = TRUE
+)
+
+# Make y be doses x plates (6 x 3) so y[i, j] matches i=dose, j=plate
+y <- t(y_raw)
+
+I <- nrow(y)  # number of doses (should be 6)
+J <- ncol(y)  # number of plates (should be 3)
+
+# JAGS data list
+jags_data <- list(y = y, x = x, I = I, J = J)
+```
+
+
+### JAGS model (centered time)
+
+```{r salm-model}
+salm_model <- "
+model {
+  for (i in 1:I) {              # doses
+    for (j in 1:J) {            # plates
+      y[i, j] ~ dpois(mu[i, j])
+      log(mu[i, j]) <- alpha + beta * log(x[i] + 10) + gamma * x[i] + lambda[i, j]
+      lambda[i, j] ~ dnorm(0, tau)
+    }
+  }
+
+  # weakly-informative priors on fixed effects
+  alpha ~ dnorm(0.0, 1.0E-6)
+  beta  ~ dnorm(0.0, 1.0E-6)
+  gamma ~ dnorm(0.0, 1.0E-6)
+
+  # PRIOR 1 on random-effects SD:
+  sigma ~ dunif(0, 100)
+  tau   <- 1 / (sigma * sigma)
+
+  # PRIOR 2 alternative (comment PRIOR 1 out if you use this):
+  # tau   ~ dgamma(1.0E-3, 1.0E-3)
+  # sigma <- 1 / sqrt(tau)
+}
+"
+```
+
+### Fit & sample
+
+```{r salm-fit, results='hide', message=TRUE}
+make_inits <- function() list(
+  alpha = 0,
+  beta  = 0,
+  gamma = 0,
+  sigma = runif(1, 0.1, 5)   # harmless if using Prior 2
+)
+
+mod <- rjags::jags.model(
+  textConnection(salm_model),
+  data  = jags_data,
+  inits = list(make_inits(), make_inits(), make_inits()),
+  n.chains = 3,
+  n.adapt  = 1000
+)
+
+update(mod, 2000)  # burn-in
+
+samp <- rjags::coda.samples(
+  model = mod,
+  variable.names = c("alpha","beta","gamma","sigma","tau"),
+  n.iter = 10000,
+  thin   = 5
+)
+```
+
+```{r rats-summaries}
+# --- Posterior summaries (SALM) ---
+# (You named the chunk rats-summaries, so I'm keeping that name.)
+sum_out <- summary(samp)
+stats   <- sum_out$statistics
+quants  <- sum_out$quantiles
+
+# Start with whatever Mean/SD are present
+base <- data.frame(param = rownames(stats), check.names = FALSE)
+if (!is.null(stats)) {
+  if ("Mean" %in% colnames(stats)) base$Mean <- stats[, "Mean"]
+  if ("SD"   %in% colnames(stats)) base$SD   <- stats[, "SD"]
+}
+
+# Add quantiles (and rename 50% -> Median)
+if (!is.null(quants)) {
+  qdf <- data.frame(
+    param  = rownames(quants),
+    `2.5%` = quants[, "2.5%"],
+    Median = quants[, "50%"],
+    `97.5%`= quants[, "97.5%"],
+    check.names = FALSE
+  )
+  sumtab <- merge(base, qdf, by = "param", all = TRUE, sort = FALSE)
+} else {
+  sumtab <- base
+}
+
+# Show the key population params for SALM
+wanted <- intersect(c("alpha","beta","gamma","sigma","tau"), sumtab$param)
+cols   <- intersect(c("Mean","SD","2.5%","Median","97.5%"), colnames(sumtab))
+
+knitr::kable(
+  round(sumtab[match(wanted, sumtab$param), cols, drop = FALSE], 4),
+  caption = "Posterior summaries for SALM fixed effects and random-effect scale."
+)
+```
+
+### Diagnostics
+
+```{r salm-diagnostics}
+# Gelman-Rubin on core params:
+keep <- intersect(c("alpha","beta","gamma","sigma","tau"), colnames(samp[[1]]))
+if (length(keep)) {
+  print(coda::gelman.diag(samp[, keep]))
+}
+
+# Quick trace and ACF plots (comment out if you prefer cleaner HTML)
+if (length(keep)) {
+  coda::traceplot(samp[, keep])
+  coda::autocorr.plot(samp[, keep])
+}
+```
+
+### Fitted lines vs data
+
+```{r salm-fitted, fig.cap="Posterior-mean fitted lines per rat (overlayed on data)", eval=requireNamespace("rjags", quietly = TRUE)}
+# --- Posterior-mean fitted curve vs observed plate means ---
+
+# Posterior means of fixed effects
+m <- tryCatch(do.call(rbind, samp), error = function(e) NULL)
+stopifnot(!is.null(m))
+am <- mean(m[, "alpha"])
+bm <- mean(m[, "beta"])
+gm <- mean(m[, "gamma"])
+
+# Expected mean (averaging over lambda_ij ~ N(0, tau), which has mean 0)
+mu_hat <- exp(am + bm * log(x + 10) + gm * x)
+
+# Observed mean count across plates at each dose
+y_bar  <- rowMeans(y)  # y is I x J (doses x plates)
+
+plot_df <- data.frame(
+  dose = x,
+  observed = y_bar,
+  fitted   = mu_hat
+)
+
+ggplot2::ggplot(plot_df, ggplot2::aes(dose, observed)) +
+  ggplot2::geom_point(size = 2) +
+  ggplot2::geom_line(ggplot2::aes(y = fitted)) +
+  ggplot2::labs(
+    x = "Dose of quinoline (µg per plate)",
+    y = "Revertant colonies (mean across plates)",
+    title = "SALM: posterior-mean fitted curve vs. observed means"
+  )
+```

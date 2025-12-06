@@ -1,0 +1,149 @@
+---
+title: "pumps package recreation"
+output: html_document
+---
+
+## Package recreation (fit + outputs)
+
+We fit the Gamma–Poisson hierarchical model with JAGS:
+xi ~ Poisson(theta_i*t_i), i = 1,...,10
+theta_i ~ Gamma(alpha, beta), i = 1,...,10
+alpha ~ Exponential(1.0)
+beta ~ Gamma (0.1, 1.0)
+
+Operation times (thousands of hours) and failure counts from WinBUGS help.
+
+### Data
+```{r pumps-data}
+
+t <- c(94.3, 15.7, 62.9, 126.0, 5.24, 31.4, 1.05, 1.05, 2.1, 10.5)
+x <- c(   5,   1,    5,   14,   3,   19,   1,   1,   4,   22)
+N <- length(x)
+
+pumps_df <- tibble::tibble(pump = factor(seq_len(N)), t, x)
+knitr::kable(pumps_df, caption = "Pumps data (operation time t and failures x).")
+```
+
+### JAGS model 
+
+```{r pumps-model}
+pumps_model <- "
+model {
+for (i in 1:N) {
+x[i] ~ dpois(lambda[i])
+lambda[i] <- theta[i] * t[i]
+theta[i] ~ dgamma(alpha, beta)
+}
+
+# hyperpriors
+
+alpha ~ dexp(1.0)           # rate=1 -> mean 1
+beta  ~ dgamma(0.1, 1.0)    # very diffuse on the rate
+}
+"
+
+jags_data <- list(x = x, t = t, N = N)
+
+# mild, dispersed inits
+
+make_inits <- function() list(
+theta = pmax(x / pmax(t, 1e-6), 1e-3),  # crude rates
+alpha = 1,
+beta  = 1
+)
+
+params <- c("alpha","beta","theta")
+```
+
+### Fit & sample
+
+```{r pumps-fit, results='hide', message=TRUE, message=TRUE, eval=requireNamespace("rjags", quietly=TRUE)}
+mod <- rjags::jags.model(
+textConnection(pumps_model),
+data  = jags_data,
+inits = list(make_inits(), make_inits(), make_inits()),
+n.chains = 3,
+n.adapt  = 1000
+)
+
+update(mod, 2000)  # burn-in
+samp <- rjags::coda.samples(
+model = mod,
+variable.names = params,
+n.iter = 10000,
+thin = 5
+)
+```
+
+```{r pumps-summaries, eval=exists("samp")}
+# --- Posterior summaries: Mean, SD, 2.5%, Median, 97.5% ---
+
+# Turn the mcmc.list into one big draws matrix
+post <- as.matrix(samp)  # rows = iterations, cols = parameters
+
+# Parameters to report, in the desired order
+wanted <- c("alpha", "beta", sprintf("theta[%d]", seq_len(N)))
+
+# Make sure they all exist
+stopifnot(all(wanted %in% colnames(post)))
+
+# Helper to compute the five stats for one column
+summ_one <- function(x) {
+  c(
+    mean   = mean(x),
+    sd     = sd(x),
+    `2.5%` = unname(quantile(x, 0.025)),
+    median = unname(quantile(x, 0.50)),
+    `97.5%`= unname(quantile(x, 0.975))
+  )
+}
+
+# Build the table in the exact order you want
+tab <- t(apply(post[, wanted, drop = FALSE], 2, summ_one))
+
+# Print nicely
+knitr::kable(
+  round(tab, 4),
+  caption = "Posterior summaries for alpha, beta, and theta[1:N] (Mean, SD, 2.5%, Median, 97.5%)."
+)
+
+cs <- summary(samp)
+cs_tab <- cbind(cs$statistics[, c("Mean","SD")], cs$quantiles[, c("2.5%","50%","97.5%")])
+cs_tab <- cs_tab[wanted, , drop = FALSE]
+all.equal(unname(tab), unname(cs_tab), tolerance = 1e-8)
+
+```
+
+### Diagnostics
+
+```{r pumps-diagnostics, eval=exists("samp")}
+coda::gelman.diag(samp[, c("alpha","beta")])
+coda::autocorr.plot(samp[, c("alpha","beta")])
+```
+
+### Fitted lines vs data
+
+```{r pumps-fitted, eval=exists("samp")}
+m <- do.call(rbind, samp)
+
+# posterior means of theta[i]
+
+theta_cols <- grepl("^theta\\[[0-9]+\\]$", colnames(m))
+theta_mean <- colMeans(m[, theta_cols, drop = FALSE])
+
+plot_df <- tibble::tibble(
+pump = factor(seq_len(N)),
+t = t,
+x = x,
+theta_hat = as.numeric(theta_mean),
+lambda_hat = theta_hat * t
+)
+
+ggplot2::ggplot(plot_df, ggplot2::aes(x = lambda_hat, y = x, label = pump)) +
+ggplot2::geom_abline(slope = 1, intercept = 0, linetype = 2) +
+ggplot2::geom_point(size = 2) +
+ggplot2::geom_text(nudge_y = 0.4, size = 3) +
+ggplot2::labs(x = expression("Posterior mean " * lambda[i] == theta[i] %.% t[i]),
+              y = expression("Observed failures " * x[i]))
+```
+

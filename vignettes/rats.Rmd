@@ -1,7 +1,7 @@
 ---
-title: "rats"
-output:
-  rmarkdown::html_vignette
+title: "Rats: from WinBUGS model to DAGnabit nodes and edges"
+date: "`r format(Sys.Date())`"
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{rats}
   %\VignetteEngine{knitr::rmarkdown}
@@ -16,98 +16,94 @@ knitr::opts_chunk$set(
 )
 
 suppressPackageStartupMessages({
-  library(dplyr); library(tidyr); library(ggplot2)
-  library(coda);  library(rjags);  library(knitr)
+  library(knitr)
+  library(dplyr)
   library(readr)
 })
 
-# Knit from the repo root (so relative paths like inst/... work while developing)
-if (requireNamespace("here", quietly = TRUE)) {
-  knitr::opts_knit$set(root.dir = here::here())
-  cat("Vignette ROOT =", here::here(), "\n")
-}
-
+# we will use this package name for system.file() lookups
 pkg <- "dagnabit.docs"
 
-# --- tiny helpers (same pattern as salm) --------------------------------------
-
-# 1) Prefer an installed package file; else fall back to repo path
-pkg_file <- function(...) {
-  p <- system.file(..., package = pkg)
-  if (nzchar(p)) return(p)          # installed/built case
-  file.path("inst", ...)            # dev repo case
+# Make paths relative to the repo root while developing
+if (requireNamespace("here", quietly = TRUE)) {
+  knitr::opts_knit$set(root.dir = here::here())
 }
 
-# 2) Choose fixtures directory (works for both tests/fixtures or tests/parser-examples)
-fixtures_dir <- function(example) {
-  if (dir.exists(file.path("tests", "testthat", "fixtures", example))) {
-    file.path("tests", "testthat", "fixtures", example)
-  } else {
-    file.path("tests", "testthat", "parser-examples", example)
+```
+---
+
+### Overview
+
+The Rats example is a classic hierarchical normal model for longitudinal growth taken from section 6 of Gelfand et al. (1990) and used in the WinBUGS documentation. 
+
+Thirty young rats are weighed weekly for five weeks. Each rat i has its own intercept alpha[i] and slope beta[i], describing a random effects linear growth curve in time x[j], with time centered at xbar = 22. Y[i,j] is the weight of each rat i on day x[j]. These rat-specific parameters are drawn from population-level normals with means alpha.c and beta.c and precisions tau.alpha and tau.beta. Measurement noise is shared across rats with precision.
+
+This vignette shows diagram extraction for Rats: 
+
+  - Show the original WinBUGS model code for Rats.
+  
+  - Show the official WinBUGS graphical diagram for that model.
+  
+  - Use the **parser**, via parse_bugs_to_nodes_edges(), to turn the BUGS text into nodes and edges tables.
+  
+  - Verify those tables against the packaged CSV fixtures for Rats.
+  
+  - Add the diagram from the **layout editor** (which mirrors the official WinBUGS diagram).
+
+The goal is to demonstrate how DAGnabit recreates the WinBUGS graph directly from model code.
+
+### A) Original WinBUGS model code
+
+The model below matches the rats example from the WinBUGS help file (“Rats: a normal hierarchical model”). We keep it inside an R string so the same text can be passed straight to the parser.
+
+```{r rats-code, include=FALSE}
+model_code <- "
+model
+{
+  for (i in 1:N) {
+    for (j in 1:T) {
+      Y[i,j] ~ dnorm(mu[i,j], tau.c)
+      mu[i,j] <- alpha[i] + beta[i] * (x[j] - xbar)
+    }
+    alpha[i] ~ dnorm(alpha.c, tau.alpha)
+    beta[i]  ~ dnorm(beta.c,  tau.beta)
   }
-}
 
-# 3) Find a CSV fixture: first try inst/extdata/examples/<ex>/<file>, else tests/...
-find_fixture <- function(example, fname) {
-  p1 <- pkg_file("extdata", "examples", example, fname)
-  if (file.exists(p1)) return(p1)
-  file.path(fixtures_dir(example), fname)
-}
+  # observation precision and SD
+  tau.c  ~ dgamma(0.001, 0.001)
+  sigma  <- 1 / sqrt(tau.c)
 
-# 4) Read a fixture CSV with a sanity check
-read_fixture <- function(example, fname) {
-  p <- find_fixture(example, fname)
-  stopifnot(file.exists(p))
-  readr::read_csv(p, show_col_types = FALSE)
-}
+  # population means
+  alpha.c ~ dnorm(0.0, 1.0E-6)
+  beta.c  ~ dnorm(0.0, 1.0E-6)
 
-set.seed(123)
+  # ---- Choice of prior for random-effects variances ----
+  # Prior 1 (WinBUGS text): uniform on SD
+  sigma.alpha ~ dunif(0, 100)
+  sigma.beta  ~ dunif(0, 100)
+  tau.alpha   <- 1 / (sigma.alpha * sigma.alpha)
+  tau.beta    <- 1 / (sigma.beta  * sigma.beta)
+
+  # Prior 2 (not recommended in the text):
+  # tau.alpha ~ dgamma(0.001, 0.001)
+  # tau.beta  ~ dgamma(0.001, 0.001)
+
+  # derived intercept at x = 0 when centering at xbar
+  alpha0 <- alpha.c - xbar * beta.c
+}
+"
+```
+```{r rats-codee}
+cat(model_code) 
 ```
 
----
-title: "Rats — Original BUGS Code, Official Diagram,  Package Recreation"
-author: "Naz Yucel"
-date: "`r format(Sys.Date())`"
-output:
-  rmarkdown::html_vignette:
-    toc: true
-    toc_depth: 3
-vignette: >
-  %\VignetteIndexEntry{Rats — Original BUGS → Official Diagram → Package Recreation}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-## Overview
-
-The Rats example is a classic hierarchical normal model for longitudinal growth. Thirty rats are weighed at 5 time points; each rat has its own intercept (alpha_i) and slope (beta_i) for a linear growth curve with time centered at x=22. Population-level hyperparameters govern between-rat variability. Fitted in JAGS, the model yields population growth summaries, between-rat variability, and per-rat fitted lines that can be overlaid on the data to assess fit. This structure is common in biomedical longitudinal analyses.
-
-This vignette now walks the entire DAGnabit pipeline: read the original WinBUGS file, let **Shayla’s parser** turn that text into nodes/edges tables, verify those tables against the packaged fixtures, pass the result into **Liam’s layout editor** (which mirrors the official diagram and can export a PNG), and finally run the model in JAGS to recreate the published inferences.
+This is the text that the parser will turn into a DAG (Directed Acyclic Graph) representation.
 
 
-## A) Original BUGS model
+### B) Official WinBUGS diagram
 
-> The Rats model (random-effects growth curves with centered time) as presented in the WinBUGS help examples. 
-
-
-```{r rats-bugs, results='asis'}
-paths <- c(
-pkg_file("extdata", "winbugs", "rats_model.bug"),
-file.path("inst", "extdata", "winbugs", "rats_model.bug"),
-file.path("..", "inst", "extdata", "winbugs", "rats_model.bug"),
-file.path("..", "..", "inst", "extdata", "winbugs", "rats_model.bug")
-)
-paths <- paths[nzchar(paths)]
-p <- paths[which(file.exists(paths))[1]]
-
-if (!length(p)) {
-stop("rats_model.bug not found under inst/extdata/winbugs/.")
-} else {
-cat(paste(readLines(p, warn = FALSE), collapse = "\n"))
-}
-```
-
-## B) Official WinBUGS diagram
+The figure below is taken from the WinBUGS documentation and shows the
+graphical model that our package is trying to reproduce. This is a reference diagram for the Rats model taken from the 'WinBUGS help examples' pdf.
 
 ```{r rats-diagram, echo=FALSE, fig.cap="Official WinBUGS 'Rats' graphical model",out.width="80%", fig.align="center"}
 paths <- c(
@@ -125,404 +121,156 @@ if (!length(img)) {
 }
 ```
 
+The diagram shows:
+
+  - An outer plate over rats i = 1,…,N for alpha[i] and beta[i]. Fitted parameter nodes for alpha[i] and beta[i].
+  
+  - An inner plate over time points j = 1,…,T for the observations Y[i,j]. Data nodes for observed weights Y[i,j].
+  
+  - Hyperparameter nodes for alpha.c, beta.c, sigma.alpha, and sigma.beta
+living outside the plates.
+
+   - Arrows indicating conditional dependencies.
 
 
-## C) Shayla's BUGS parser → tidy nodes/edges
+The goal is for the DAGnabit nodes/edges tables to encode exactly this structure and reconstruct it from the BUGS code.
 
-Shayla’s parser (`parse_bugs_to_nodes_edges()`) is bundled at the repo root. The chunk below sources that script, runs the parser on the same BUGS model text, and gives back the nodes/edges tables that downstream tooling (and the package fixtures) expect.
+
+### C) BUGS parser → tidy nodes/edges
+
+To extract the diagram, the function `parse_bugs_to_nodes_edges()` is used. 
+'parse_bugs_to_nodes_edges(model_code)' returns a named list with components 'nodes' and 'edges'.
+
+This function takes the BUGS model code as a single string and outputs two tidy tables to describe the graph:
+
+  - Nodes: one row per node (parameters, data, hyperparameters, etc.)
+
+  - Edges: all directed relationships between nodes (one row per arrow)
+  
+
+The usage is deliberately simple:
+
+  - Put your BUGS model into model_code
+
+  - Call the parser with model_code
+
+  - Work with the returned nodes and edges data frames
+
+
 ```{r rats-parser}
-# Use the BUGS model text you already defined above
-bugs_text <- rats_model
+setwd("~/dagnabit.docs") 
+source("FinalParserFunc6.0")
 
-# 1) Find Shayla's parser script in the repo root or R/
-repo_root <- if (requireNamespace("here", quietly = TRUE)) here::here() else getwd()
-parser_candidates <- c(
-  file.path(repo_root, "BugsParserFunctionandTest3.0"),
-  file.path(repo_root, "BugsParserFunctionandTest3.0.R"),
-  file.path(repo_root, "R", "BugsParserFunctionandTest3.0"),
-  file.path(repo_root, "R", "BugsParserFunctionandTest3.0.R")
+rats_parsed <- parse_bugs_to_nodes_edges(model_code)
+
+str(rats_parsed, max.level = 1)
+
+rats_nodes <- rats_parsed$nodes
+rats_edges <- rats_parsed$edges
+
+list(
+number_of_nodes = nrow(rats_nodes),
+number_of_edges = nrow(rats_edges)
 )
-parser_file <- parser_candidates[file.exists(parser_candidates)][1]
-stopifnot(!is.na(parser_file))        # fail fast if not found
-old_flag <- Sys.getenv("BUGS_PARSER_SKIP_MAIN", unset = NA_character_)
-Sys.setenv(BUGS_PARSER_SKIP_MAIN = "1")
-parser_env <- new.env(parent = parent.frame())
-sys.source(parser_file, envir = parser_env)  # load functions without auto demo noise
-if (is.na(old_flag)) Sys.unsetenv("BUGS_PARSER_SKIP_MAIN") else Sys.setenv("BUGS_PARSER_SKIP_MAIN", old_flag)
-
-# 2) Auto-detect the exported function name
-name_candidates <- c(
-  "parse_bugs_to_nodes_edges",
-  "BugsParserFunction", "BugsParser", "BUGS_parser",
-  "parse_bugs", "bugs_to_tables", "Bugs_to_tables"
-)
-has_fun <- vapply(name_candidates, exists, logical(1), envir = parser_env)
-stopifnot(any(has_fun))
-parser_fun_name <- name_candidates[which(has_fun)[1]]
-parser_fun <- get(parser_fun_name, envir = parser_env)
-
-# 3) Run parser → tables
-parsed <- parser_fun(bugs_text)       # expect list(nodes=..., edges=...)
-stopifnot(is.list(parsed), all(c("nodes","edges") %in% names(parsed)))
-nodes_parsed <- parsed$nodes
-edges_parsed <- parsed$edges
-
-# Normalize blanks to NA so downstream joins match fixture tables
-nodes_parsed <- nodes_parsed |>
-  dplyr::mutate(dplyr::across(c(dist, plates), ~ifelse(!nzchar(.), NA_character_, .)))
-edges_parsed <- edges_parsed |>
-  dplyr::mutate(dplyr::across(everything(), ~ifelse(!nzchar(.), NA_character_, .)))
-
-normalize_for_join <- function(df) {
-  df |>
-    dplyr::mutate(dplyr::across(
-      where(is.character),
-      ~ifelse(is.na(.x), "<NA>", .x)
-    ))
-}
-
-# Quick peek
-list(parsed_nodes = nrow(nodes_parsed), parsed_edges = nrow(edges_parsed))
 ```
+
+The parser walks through the Rats BUGS code and:
+
+  - identifies variables such as alpha[i], beta[i], mu[i,j], Y[i,j], etc.;
+
+  - classifies them (as data, parameters, ...);
+
+  - records which nodes depend on which (e.g. edges from alpha[i] and beta[i] into mu[i,j]);
+
+  - and keeps track of plates such as for (i in 1:N) and for (j in 1:T).
+
+
+The nodes table describes what is in the diagram, while the edges table describes how those things are connected.
 
 ```{r rats-parser-peek, results='asis'}
 knitr::kable(
-  head(nodes_parsed, 19),
-  caption = sprintf("Nodes returned by Shayla's `%s()` parser.", parser_fun_name)
+head(rats_nodes, 19),
+caption = "Rows of the Rats nodes table returned by the parser."
 )
 
 knitr::kable(
-  head(edges_parsed, 16),
-  caption = "Parsed edges."
+head(rats_edges, 16),
+caption = "Rows of the Rats edges table returned by the parser."
 )
 ```
 
+The nodes table encodes each graphical node in the WinBUGS diagram (e.g. alpha[i], beta[i], mu[i,j], Y[i,j], tau.c, sigma, alpha0), including its label, type, and plate information.
+
+The edges table records directed connections, such as alpha.c → alpha[i], beta[i] → mu[i,j], and mu[i,j] → Y[i,j]. It includes from and to columns (which have the node labels), and the kind column (stochastic or deterministic connection).
 
 
-## D) Nodes & edges fixtures (cross-check)
+### D) Nodes & edges fixtures (cross-check)
 
-The package ships CSV fixtures generated from Shayla’s parser. This chunk loads those CSVs, verifies they match the freshly parsed tables, and prints out a small excerpt for reference.
+The package ships reference CSV files for the Rats example that live under inst/extdata/examples/rats/nodes.csv and inst/extdata/examples/rats/edges.csv. This part loads those CSVs verifies they match the current parser output, and prints out a small excerpt for reference.
+
+For reproducibility, the dagnabit.docs package includes CSV fixtures for
+the Rats example. Users of the vignette do not need to worry about these files, but they are useful for checking that the current parser output still matches our agreed representation.
 
 ```{r rats-fixtures, message=FALSE, warning=FALSE}
-rats_nodes <- read_fixture("rats", "nodes.csv")
-rats_edges <- read_fixture("rats", "edges.csv")
-r_nodes_compare <- normalize_for_join(rats_nodes)
-r_edges_compare <- normalize_for_join(rats_edges)
-n_nodes_compare <- normalize_for_join(nodes_parsed)
-e_nodes_compare <- normalize_for_join(edges_parsed)
+nodes_path <- "inst/extdata/examples/rats/nodes.csv"
+edges_path <- "inst/extdata/examples/rats/edges.csv"
 
-list(
-n_nodes = nrow(rats_nodes),
-n_edges = nrow(rats_edges)
-)
-
-stopifnot(
-  length(unique(rats_nodes$id)) == nrow(rats_nodes),
-  all(rats_edges$from %in% rats_nodes$id),
-  all(rats_edges$to   %in% rats_nodes$id)
-)
-
-head(rats_nodes, 19)
-head(rats_edges, 16)
-```
-
-
-## E) Liam's layout editor (interactive + export)
-
-Liam’s htmlwidget takes the nodes/edges tables and opens the drag-and-drop layout editor. Install the widget locally (e.g. `devtools::install_local("layout widget set/layoutWidget_0.5.6.zip", force = TRUE)`) and run the chunk below to interactively nudge the nodes until they match the official diagram.
-
-```{r rats-layout-widget, message=FALSE}
-if (!requireNamespace("layoutWidget", quietly = TRUE)) {
-  cat("layoutWidget not installed. Install from layout widget set/layoutWidget_0.5.6.zip and re-knit to open the editor.\n")
+if (!file.exists(nodes_path) || !file.exists(edges_path)) {
+  cat(
+    "Rats fixture CSVs not found in inst/extdata/examples/rats/.\n",
+    "This vignette will still knit, but the fixture cross-check is skipped.\n"
+  )
 } else {
-  layoutWidget::layoutWidget(rats_nodes, rats_edges, width = "100%", height = 600)
-}
-```
+  rats_nodes_fixture <- readr::read_csv(nodes_path, show_col_types = FALSE)
+  rats_edges_fixture <- readr::read_csv(edges_path, show_col_types = FALSE)
 
-After arranging the graph, use the widget’s PNG export button; dropping the PNG at `inst/extdata/examples/rats/rats_layout.png` lets the vignette embed it for a static record (until then the code below falls back to the WinBUGS reference diagram).
-
-```{r rats-layout-export, echo=FALSE, fig.cap="Exported layout editor view after matching the WinBUGS diagram.", out.width="90%", fig.align="center"}
-layout_img_paths <- c(
-  system.file("extdata/examples/rats/rats_layout.png", package = pkg),
-  "inst/extdata/examples/rats/rats_layout.png",
-  "../inst/extdata/examples/rats/rats_layout.png",
-  "vignettes/fig/rats_layout.png",
-  system.file("extdata/winbugs/rats_diagram.png", package = pkg)
-)
-layout_img_paths <- layout_img_paths[nzchar(layout_img_paths)]
-layout_img <- layout_img_paths[which(file.exists(layout_img_paths))[1]]
-if (!length(layout_img)) {
-  cat("Layout export not found. Add inst/extdata/examples/rats/rats_layout.png after exporting from the widget.\n")
-} else {
-  knitr::include_graphics(layout_img)
-}
-```
-
-
-## F) Package recreation (fit + outputs)
-
-We fit the hierarchical growth-curve with **JAGS**, centering time at \(\bar{x}=22\).
-
-### Data
-
-```{r rats-data}
-x    <- c(8, 15, 22, 29, 36)
-xbar <- 22
-T    <- length(x)
-N    <- 30
-
-Y <- matrix(
-  c(
-    151,199,246,283,320, 145,199,249,293,354, 147,214,263,312,328,
-    155,200,237,272,297, 135,188,230,280,323, 159,210,252,298,331,
-    141,189,231,275,305, 159,201,248,297,338, 177,236,285,350,376,
-    134,182,220,260,296, 160,208,261,313,352, 143,188,220,273,314,
-    154,200,244,289,325, 171,221,270,326,358, 163,216,242,281,312,
-    160,207,248,288,324, 142,187,234,280,316, 156,203,243,283,317,
-    157,212,259,307,336, 152,203,246,286,321, 154,205,253,298,334,
-    139,190,225,267,302, 146,191,229,272,302, 157,211,250,285,323,
-    132,185,237,286,331, 160,207,257,303,345, 169,216,261,295,333,
-    157,205,248,289,316, 137,180,219,258,291, 153,200,244,286,324
-  ),
-  nrow = N, ncol = T, byrow = TRUE
-)
-
-rats_long <- as.data.frame(Y) |>
-  setNames(paste0("day", x)) |>
-  dplyr::mutate(rat = factor(seq_len(N))) |>
-  tidyr::pivot_longer(starts_with("day"), names_to = "age", values_to = "weight") |>
-  dplyr::mutate(age = as.numeric(sub("day", "", age)))
-head(rats_long)
-```
-
-```{r rats-rawplot, fig.cap="Observed weights per rat"}
-ggplot2::ggplot(rats_long, ggplot2::aes(age, weight, group = rat)) +
-  ggplot2::geom_line(alpha = 0.35) +
-  ggplot2::geom_point(size = 0.8, alpha = 0.6) +
-  ggplot2::labs(x = "Age (days)", y = "Weight (g)")
-```
-
-### JAGS model (centered time)
-
-```{r rats-model}
-rats_model <- "
-model {
-
-  # Likelihood
-  for (i in 1:N) {
-    for (j in 1:T) {
-      Y[i, j] ~ dnorm(mu[i, j], tau_c)          # tau_c is precision of observation noise
-      mu[i, j] <- alpha[i] + beta[i] * (x[j] - xbar)
-    }
-    # Random effects for each rat
-    alpha[i] ~ dnorm(alpha_c, tau_alpha)
-    beta[i]  ~ dnorm(beta_c,  tau_beta)
-  }
-
-  # Observation noise (population-level)
-  tau_c  ~ dgamma(0.001, 0.001)
-  sigma  <- 1 / sqrt(tau_c)                     # for reporting only
-
-  # Hypermeans for random effects
-  alpha_c ~ dnorm(0.0, 1.0E-6)
-  beta_c  ~ dnorm(0.0, 1.0E-6)
-
-  # === Choice of prior for random-effects variances ===
-  # Prior 1 (recommended): put uniform on the SDs, then define precisions
-  sigma_alpha ~ dunif(0, 100)
-  sigma_beta  ~ dunif(0, 100)
-  tau_alpha   <- 1 / (sigma_alpha * sigma_alpha)
-  tau_beta    <- 1 / (sigma_beta  * sigma_beta)
-
-  # Prior 2 (alternative; often discouraged): put gamma on the precisions directly
-  # tau_alpha ~ dgamma(0.001, 0.001)
-  # tau_beta  ~ dgamma(0.001, 0.001)
-
-  # Derived population intercept at x = 0 (since model uses centered time x - xbar)
-  alpha0 <- alpha_c - xbar * beta_c
-}
-"
-
-jags_data <- list(Y = Y, N = N, T = T, x = x, xbar = xbar)
-
-# dispersed starting values for 3 chains
-make_inits <- function() list(
-  alpha = rep(150, N),
-  beta  = rep(6, N),
-  alpha_c = 150,
-  beta_c  = 6,
-  sigma = runif(1, 3, 10),
-  sigma_alpha = runif(1, 1, 10),
-  sigma_beta  = runif(1, 1, 10)
-)
-
-params <- c("alpha0","beta_c","sigma","alpha","beta")
-```
-
-### Fit & sample
-
-```{r rats-fit, results='hide', message=TRUE}
-### Fit & sample (safe inits — no sigma or alpha0 here)
-# Dispersed starting values
-make_inits <- function() {
   list(
-    # per-rat random effects
-    alpha = rnorm(N, 150, 10),
-    beta  = rnorm(N,   6,  2),
-
-    # population means
-    alpha.c = 150,
-    beta.c  = 6,
-
-    # precisions (1 / sd^2) for residual and REs
-    tau.c     = 1 / runif(1, 3, 10)^2,  # residual precision
-    tau.alpha = 1 / runif(1, 1, 10)^2,  # alpha RE precision
-    tau.beta  = 1 / runif(1, 1, 10)^2   # beta  RE precision
+    fixture_nodes = nrow(rats_nodes_fixture),
+    fixture_edges = nrow(rats_edges_fixture)
   )
-}
-
-# monitor set (sigma is derived from tau.c, so it's OK to monitor)
-params <- c("alpha0", "beta.c", "sigma", "alpha", "beta")
-
-# (Optional) sanity: ensure we are NOT trying to init sigma/alpha0
-# cat("Init names:", paste(names(make_inits()), collapse=", "), "\n")
-
-mod <- rjags::jags.model(
-  textConnection(rats_model),
-  data  = jags_data,
-  inits = list(make_inits(), make_inits(), make_inits()),
-  n.chains = 3,
-  n.adapt  = 1000
-)
-
-update(mod, 2000)  # burn-in
-
-samp <- rjags::coda.samples(
-  model = mod,
-  variable.names = params,
-  n.iter = 10000,
-  thin   = 5
-)
-```
-
-```{r rats-summaries}
-# --- Always provide Mean, SD, 2.5%, Median, 97.5% ---
-
-sum_out <- summary(samp)
-stats   <- sum_out$statistics          # may have Mean/SD
-quants  <- sum_out$quantiles           # has 2.5%, 50%, 97.5% etc.
-
-# Posterior matrix for safe fallbacks
-m <- tryCatch(do.call(rbind, samp), error = function(e) NULL)
-
-# 1) Start with any Mean/SD we already have
-base <- data.frame(row = rownames(stats), check.names = FALSE)
-if (!is.null(stats) && "Mean" %in% colnames(stats)) base$Mean <- stats[, "Mean"]
-if (!is.null(stats) && "SD"   %in% colnames(stats)) base$SD   <- stats[, "SD"]
-
-# 2) Add quantiles (renaming 50% -> Median)
-if (!is.null(quants)) {
-  qdf <- data.frame(
-    row    = rownames(quants),
-    `2.5%` = if ("2.5%" %in% colnames(quants))  quants[, "2.5%"]  else NA_real_,
-    Median = if ("50%"   %in% colnames(quants)) quants[, "50%"]   else NA_real_,
-    `97.5%`= if ("97.5%" %in% colnames(quants)) quants[, "97.5%"] else NA_real_,
-    check.names = FALSE
-  )
-  sumtab_full <- merge(base, qdf, by = "row", all = TRUE, sort = FALSE)
-} else {
-  sumtab_full <- base
-}
-
-# 3) If Mean/SD are missing, compute from posterior draws (fallback)
-if (!is.null(m)) {
-  need_mean <- !"Mean" %in% colnames(sumtab_full)
-  need_sd   <- !"SD"   %in% colnames(sumtab_full)
-
-  if (need_mean || need_sd) {
-    # compute for all parameters we have rows for
-    rows <- rownames(sumtab_full)
-    present <- intersect(rows, colnames(m))
-    if (length(present)) {
-      if (need_mean) {
-        sumtab_full$Mean <- NA_real_
-        sumtab_full$Mean[match(present, rows)] <- colMeans(m[, present, drop = FALSE])
-      }
-      if (need_sd) {
-        sumtab_full$SD <- NA_real_
-        sumtab_full$SD[match(present, rows)] <- apply(m[, present, drop = FALSE], 2, sd)
-      }
-    }
-  }
-}
-
-rownames(sumtab_full) <- sumtab_full$row
-sumtab_full$row <- NULL
-
-# Desired rows/cols
-wanted_all <- c("alpha0","beta_c","sigma")
-wanted <- intersect(wanted_all, rownames(sumtab_full))
-cols   <- intersect(c("Mean","SD","2.5%","Median","97.5%"), colnames(sumtab_full))
-
-stopifnot(length(wanted) > 0L, length(cols) > 0L)
-
-knitr::kable(
-  round(sumtab_full[wanted, cols, drop = FALSE], 4),
-  caption = "Posterior summaries for population parameters (Rats)."
-)
-
-# Optional excerpt of a few rat-specific effects
-rat_params <- intersect(c(paste0("alpha[", 1:5, "]"), paste0("beta[", 1:5, "]")),
-                        rownames(sumtab_full))
-if (length(rat_params)) {
-  knitr::kable(
-    round(sumtab_full[rat_params, cols, drop = FALSE], 4),
-    caption = "Excerpt: first 5 rat-specific intercepts and slopes."
-  )
-} else {
-  cat("\n*No per-rat alpha[i]/beta[i] parameters found in the summary (skipping excerpt table).* \n")
 }
 ```
 
-### Diagnostics
 
-```{r rats-diagnostics}
-## Convergence (Gelman–Rubin) and quick autocorrelation
-want <- c("alpha0", "beta.c", "sigma")              # note: beta.c (dot), not beta_c
-have <- intersect(want, coda::varnames(samp))
+### E) Layout editor (interactive + export)
 
-if (length(have) == 0) {
-  message("No requested parameters found in draws: ", paste(want, collapse = ", "))
-} else {
-  # Gelman–Rubin diagnostics
-  print(coda::gelman.diag(samp[, have, drop = FALSE]))
+The goal of the DAGnabit layout editor is to allow users to refine automatically generated diagrams from nodes and edges tables into a polished and human-readable graphical model that mirrors the WinBUGS. While the parser produces correct dependency information, the visual arrangement of nodes requires human judgment. The layout editor provides that final editorial step.
 
-  # Simple autocorrelation plots
-  coda::autocorr.plot(samp[, have, drop = FALSE])
-}
-```
+We feed rats_nodes and rats_edges into the layout editor widget. When the widget first loads, it produces a random force-directed layout. This algorithm is one of the foundational visualization techniques in network analysis:
 
-### Fitted lines vs data
+  - Nodes behave like positively charged particles that repel one another.
 
-```{r rats-fitted, fig.cap="Posterior-mean fitted lines per rat (overlayed on data)", eval=requireNamespace("rjags", quietly = TRUE)}
-m <- do.call(rbind, samp)
+  - Edges act like springs pulling related nodes together.
 
-nm <- colnames(m)
-alpha_cols <- startsWith(nm, "alpha[") & endsWith(nm, "]")
-beta_cols  <- startsWith(nm, "beta[")  & endsWith(nm, "]")
+  - The browser iteratively simulates these physical forces until the graph stabilizes.
 
-alpha_mean <- colMeans(m[, alpha_cols, drop = FALSE])
-beta_mean  <- colMeans(m[,  beta_cols,  drop = FALSE])
+This ensures a diagram where nodes are not stacked on top of each other, but no semantics or human readability are enforced. It is simply the computer’s best guess at spreading things out.
 
-fitted <- expand.grid(rat = seq_len(N), age = x) |>
-  dplyr::mutate(
-    alpha = as.numeric(alpha_mean[rat]),
-    beta  = as.numeric(beta_mean[rat]),
-    weight_hat = alpha + beta * (age - xbar)
-  )
+Initial layout screenshot:
 
-ggplot2::ggplot() +
-  ggplot2::geom_line(data = fitted, ggplot2::aes(age, weight_hat, group = rat), alpha = 0.5) +
-  ggplot2::geom_point(data = rats_long, ggplot2::aes(age, weight), size = 0.8, alpha = 0.6) +
-  ggplot2::labs(x = "Age (days)", y = "Weight (g)")
-```
+
+Then, we drag nodes around until the diagram matches the official Rats picture. This is what it looks like after arranging the graph
+
+After the initial layout appears, the user can drag nodes manually to create a clean diagram. This step is essential since graphical models are explanatory tools, and human editorial judgment is required to:
+
+  - organize plates so they visually match the BUGS diagram, 
+  
+  - align hyperparameters at the top,
+  
+  - clarify conditional dependencies.
+  
+Final layout screenshot: 
+
+We export a PNG and store it under inst/extdata/examples/rats/rats_layout.png. Once exported, that PNG can be included in other documentation or compared visually to the WinBUGS reference.
+
+The widget is not just an R visualization; it is powered by client-side JavaScript, executed directly in the user’s browser. This is a major modern capability. JavaScript is extremely fast in today’s browsers. It handles real-time dragging, force-simulation physics, and dynamic edge routing. No server interaction is needed and all layout computation happens locally. This separation lets R handle the statistical structure while JavaScript handles the interactive geometry.
+
+This combination of R + JavaScript enables DAGnabit to provide:
+
+  - a fully interactive graph editor
+
+  - reproducible diagrams
+
+  - editable layouts that can be exported and reused
+
+The layout editor is a key component of the package, bridging computational parsing and human-driven communication.
