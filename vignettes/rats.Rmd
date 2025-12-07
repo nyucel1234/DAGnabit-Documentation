@@ -231,6 +231,8 @@ if (!file.exists(nodes_path) || !file.exists(edges_path)) {
 }
 ```
 
+We can see that the number of nodes and edges in the reference CSV files matches the number of nodes and edges we get from the BUGS parser.
+
 
 ### E) Layout editor (interactive + export)
 

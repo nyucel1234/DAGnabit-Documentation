@@ -218,6 +218,8 @@ fixture_edges = nrow(salm_edges_fixture)
 }
 ```
 
+We can see that the number of nodes and edges in the reference CSV files matches the number of nodes and edges we get from the BUGS parser.
+
 
 ### E) Layout editor (interactive + export)
 
