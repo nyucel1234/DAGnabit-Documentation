@@ -232,7 +232,23 @@ We feed pumps_nodes and pumps_edges into the layout editor widget. When the widg
 This ensures a diagram where nodes are not stacked on top of each other, but no semantics or human readability are enforced. It is simply the computer’s best guess at spreading things out.
 
 Initial layout screenshot:
+```{r pumps-layout-initial, echo=FALSE, fig.cap="Initial force-directed layout for the Pumps example.", out.width="80%", fig.align="center"}
+paths <- c(
+  system.file("extdata/examples/pumps/pumps_layout_initial.png", package = pkg),
+  "inst/extdata/examples/pumps/pumps_layout_initial.png",
+  "../inst/extdata/examples/pumps/pumps_layout_initial.png",
+  "vignettes/pumps_layout_initial.png"
+)
 
+paths <- paths[nzchar(paths)]
+img <- paths[file.exists(paths)][1]
+
+if (length(img) && !is.na(img)) {
+  knitr::include_graphics(img)
+} else {
+  cat("Initial Pumps layout PNG not found. Add pumps_layout_initial.png to inst/extdata/examples/pumps/ and re-knit.\n")
+}
+```
 
 Then, we drag nodes around until the diagram matches the official Pumps picture. This is what it looks like after arranging the graph
 
@@ -245,6 +261,23 @@ After the initial layout appears, the user can drag nodes manually to create a c
   - clarify conditional dependencies.
   
 Final layout screenshot: 
+```{r pumps-layout-final, echo=FALSE, fig.cap="Manually edited layout for the Pumps example (matching the WinBUGS diagram).", out.width="80%", fig.align="center"}
+paths <- c(
+  system.file("extdata/examples/pumps/pumps_layout_final.png", package = pkg),
+  "inst/extdata/examples/pumps/pumps_layout_final.png",
+  "../inst/extdata/examples/pumps/pumps_layout_final.png",
+  "vignettes/pumps_layout_final.png"
+)
+
+paths <- paths[nzchar(paths)]
+img <- paths[file.exists(paths)][1]
+
+if (length(img) && !is.na(img)) {
+  knitr::include_graphics(img)
+} else {
+  cat("Final Pumps layout PNG not found. Add pumps_layout_final.png to inst/extdata/examples/pumps/ and re-knit.\n")
+}
+```
 
 We export a PNG and store it under inst/extdata/examples/pumps/pumps_layout.png. Once exported, that PNG can be included in other documentation or compared visually to the WinBUGS reference.
 
