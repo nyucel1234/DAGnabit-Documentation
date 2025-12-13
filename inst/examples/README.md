@@ -1,5 +1,5 @@
-Reverse engineered data frames from 3 test cases with interesting plate structures from the WinBUGS examples pdf
+Reverse engineered data frames from 3 test cases with interesting plate structures from the WinBUGS help examples pdf:
 
-- **rats**: Rats growth (30 rats × 5 days); columns: rat, day, weight. Source: WinBUGS help examples.
-- **salm**: Salmonella mutagenicity assay (3 plates × 6 doses). Source: WinBUGS help examples.
-- **dyes**: Dyes variance components (6 batches × 5 samples). Source: WinBUGS help example.
+- **rats**: Rats growth (30 rats × 5 days); columns: rat, day, weight. 
+- **salm**: Salmonella mutagenicity assay (3 plates × 6 doses). 
+- **dyes**: Dyes variance components (6 batches × 5 samples). 
