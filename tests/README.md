@@ -1,4 +1,4 @@
-The testthat folder has
+The testthat folder has:
 ---
 Helper helper-fixtures.R to help load correct files safely
 
